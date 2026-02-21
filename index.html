@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>OLX · UAE property marketplace (approval flow)</title>
+  <!-- Font Awesome 6 (free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+    }
+    body {
+      background: #f2f4f5;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .olx-nav {
+      background-color: #ffffff;
+      box-shadow: 0 2px 6px 0 rgba(0,0,0,0.08);
+      padding: 0.4rem 1rem;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #e0e6e9;
+    }
+    .nav-logo img {
+      height: 80px;
+      width: auto;
+      max-width: 160px;
+      object-fit: contain;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-left: auto;
+    }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #2f4f5a;
+      border-radius: 30px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.15s;
+    }
+    .nav-btn i { font-size: 1.2rem; color: #5f8d99; }
+    .nav-btn:hover { background-color: #e7f0f3; color: #002f34; }
+    .nav-btn.upload { background: #002f34; color: white; box-shadow: 0 3px 8px rgba(0,47,52,0.15); }
+    .nav-btn.upload i { color: #2fe0d6; }
+    .nav-btn.upload:hover { background: #14555f; }
+    .auth-buttons {
+      display: flex;
+      gap: 6px;
+      margin-left: 10px;
+    }
+    .auth-btn {
+      background: white;
+      border: 1px solid #cbdde4;
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+      font-weight: 500;
+      color: #134752;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: 0.15s;
+    }
+    .auth-btn i { margin-right: 4px; color: #008b99; }
+    .auth-btn:hover { background: #ebf4f7; border-color: #009fae; }
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 1.2rem 0.8rem 2rem;
+      flex: 1;
+      width: 100%;
+    }
+    .login-box {
+      max-width: 480px;
+      margin: 2.5rem auto;
+      background: white;
+      border-radius: 36px;
+      padding: 2.2rem 1.8rem;
+      box-shadow: 0 18px 35px -8px #a0bcc6;
+      border: 1px solid #ffffff;
+    }
+    h3 { font-weight: 600; color: #0f3b44; margin-bottom: 1.2rem; }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      margin: 8px 0 12px;
+      border-radius: 30px;
+      border: 1.5px solid #d5e3e9;
+      background: #ffffff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #2fe0d6;
+      box-shadow: 0 0 0 3px #b3f0ec;
+    }
+    .btn-primary {
+      background: #002f34;
+      color: white;
+      border: none;
+      padding: 1rem 1.8rem;
+      width: 100%;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 6px 12px #002f3430;
+      transition: 0.15s;
+    }
+    .btn-primary:hover { background: #18545e; }
+    .filters {
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: 60px;
+      box-shadow: 0 2px 10px #d5e0e5;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0 2rem;
+      border: 1px solid #ffffff;
+    }
+    .filters select, .filters input {
+      width: auto;
+      min-width: 150px;
+      margin: 0;
+      background: #f8fbfd;
+      border-radius: 40px;
+      padding: 0.6rem 1.2rem;
+      border: 1px solid #bfd7e2;
+      flex: 1 1 150px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 6px 16px -5px #a0bccb;
+      transition: 0.2s ease;
+      border: 1px solid #e1edf2;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 18px 30px -8px #7fa1ad; }
+    .card-img {
+      height: 200px;
+      background: #d2e1e9;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-img img { width: 100%; height: 100%; object-fit: cover; }
+    .badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #002f34e0;
+      backdrop-filter: blur(3px);
+      color: white;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .pending-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: #f5a623;
+      color: #002f34;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .card-body { padding: 1.2rem 1rem 1.4rem; flex: 1; }
+    .price { font-weight: 700; font-size: 1.6rem; color: #002f34; line-height: 1.3; }
+    .price small { font-size: 0.9rem; font-weight: 500; color: #3f7b86; }
+    .prop-title { font-weight: 600; font-size: 1.2rem; margin: 0.2rem 0; }
+    .prop-loc { display: flex; align-items: center; gap: 4px; color: #3b6873; font-size: 0.9rem; }
+    .specs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+      font-size: 0.85rem;
+      background: #f0f6f9;
+      padding: 0.4rem 0.8rem;
+      border-radius: 30px;
+      color: #17525e;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 1rem;
+      border-top: 1px solid #dbeaf0;
+      padding-top: 1rem;
+    }
+    .actions button {
+      background: white;
+      border: 1px solid #bdd7e3;
+      padding: 0.4rem 0.8rem;
+      border-radius: 34px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #0b404b;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .actions button i { color: #008b99; }
+    .social-share {
+      margin-left: auto;
+      display: flex;
+      gap: 5px;
+    }
+    .social-share a {
+      background: #f0f9ff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #0b4855;
+      border: 1px solid #b8d6e5;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: 0.1s;
+    }
+    .social-share a:hover { background: #002f34; color: white; border-color: #002f34; }
+    #addBox { display: none; margin-bottom: 2rem; }
+
+    /* admin approve/decline buttons */
+    .admin-approve {
+      background: #e1f7f5 !important;
+      border-color: #2fe0d6 !important;
+      font-weight: 600;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: #ffffff;
+      border-top: 1px solid #d9e5eb;
+      padding: 2rem 1rem 1.5rem;
+      margin-top: 3rem;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.02);
+    }
+    .footer-content {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+    .footer-logo img { height: 80px; width: auto; max-width: 180px; object-fit: contain; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 2rem; }
+    .footer-col { min-width: 120px; }
+    .footer-col h4 { color: #002f34; font-size: 1rem; margin-bottom: 0.8rem; font-weight: 600; }
+    .footer-col a { display: block; color: #366f7c; text-decoration: none; font-size: 0.9rem; margin-bottom: 0.4rem; }
+    .footer-col a:hover { color: #002f34; text-decoration: underline; }
+    .footer-social { display: flex; gap: 1rem; font-size: 1.3rem; color: #2e6b79; }
+    .footer-social a { color: #2e6b79; transition: 0.15s; }
+    .footer-social a:hover { color: #002f34; transform: scale(1.1); }
+    .footer-bottom {
+      max-width: 1300px;
+      margin: 1.5rem auto 0;
+      padding-top: 1.2rem;
+      border-top: 1px solid #e4eef2;
+      text-align: center;
+      color: #4b7e8b;
+      font-size: 0.85rem;
+    }
+    @media (max-width: 600px) {
+      .olx-nav { padding: 0.6rem 0.8rem; }
+      .nav-logo img { height: 36px; }
+      .nav-links { order: 3; width: 100%; justify-content: space-between; margin-top: 6px; }
+      .auth-buttons { margin-left: 0; width: 100%; justify-content: flex-end; }
+      .filters { border-radius: 30px; padding: 1rem; }
+      .footer-content { flex-direction: column; text-align: center; }
+      .footer-links { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar with image logo -->
+<div class="olx-nav">
+  <div class="nav-logo">
+    <img src="image.png" alt="AEON logo">
+  </div>
+  <div class="nav-links">
+    <button class="nav-btn" onclick="showAllProperties()"><i class="fas fa-list-ul"></i> Property</button>
+    <button class="nav-btn upload" onclick="handleUploadClick()"><i class="fas fa-plus-circle"></i> Upload Property</button>
+    <div class="auth-buttons">
+      <button class="auth-btn" onclick="showLogin()"><i class="fas fa-key"></i> Login</button>
+      <button class="auth-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- LOGIN PAGE -->
+  <div id="loginPage" class="login-box">
+    <h3><i class="fas fa-lock-open" style="color:#2fe0d6;"></i> Agent access</h3>
+    <input id="username" placeholder="Username" value="admin">
+    <input id="password" type="password" placeholder="Password" value="admin123">
+    <button class="btn-primary" onclick="login()"><i class="fas fa-arrow-right-to-bracket"></i> secure login</button>
+    <div style="text-align:center; margin-top:1rem; color:#2b6c7a;"><i class="fas fa-circle-info"></i> admin/admin123 • user/user123</div>
+  </div>
+
+  <!-- MAIN APP (hidden initially) -->
+  <div id="app" style="display: none">
+    <!-- ADD PROPERTY CARD (only for user) -->
+    <div id="addBox" class="login-box" style="display: none; max-width:800px;">
+      <h3><i class="fas fa-upload" style="color:#2fe0d6;"></i> List new property</h3>
+      <div style="display:grid; gap:0.5rem 1rem; grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        <input id="title" placeholder="Title e.g. Marina View">
+        <select id="city"><option>Dubai</option><option>Abu Dhabi</option><option>Sharjah</option><option>Ajman</option><option>Ras Al Khaimah</option><option>Fujairah</option><option>Umm Al Quwain</option></select>
+        <input id="area" placeholder="District / community">
+        <select id="type"><option>Bed Space</option><option>Partition</option><option>Room</option><option>Hall</option><option>Studio</option><option>1 BHK</option><option>2 BHK</option><option>3 BHK</option><option>Villa</option><option>Shop</option><option>Office</option><option>Warehouse</option><option>Parking</option></select>
+        <input id="price" placeholder="Price (AED)">
+        <select id="rent"><option>Per Hour</option><option>Per Day</option><option>Monthly</option><option>Annually</option><option>Sale</option></select>
+      </div>
+      <textarea id="desc" rows="2" placeholder="Full description ..."></textarea>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin:6px 0">
+        <select id="balcony" style="flex:1"><option>Balcony No</option><option>Balcony Yes</option></select>
+        <select id="attached" style="flex:1"><option>Attached Washroom No</option><option>Attached Washroom Yes</option></select>
+        <select id="kids" style="flex:1"><option>Kids No</option><option>Kids Yes</option></select>
+        <select id="bachelors" style="flex:1"><option>Bachelors No</option><option>Bachelors Yes</option></select>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center">
+        <input id="phone" placeholder="Owner phone (private)" style="flex:2">
+        <input type="file" id="imageUpload" accept="image/*" style="flex:3">
+      </div>
+      <input id="location" placeholder="Google Maps link">
+      <button class="btn-primary" onclick="addProperty()"><i class="fas fa-cloud-upload-alt"></i> submit for approval</button>
+      <p style="font-size:0.8rem; margin-top:6px;"><i class="fas fa-clock"></i> Property will be visible after admin approves</p>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters">
+      <select id="filterCity" onchange="render()">
+        <option value="">All Emirates</option>
+        <option>Dubai</option><option>Abu Dhabi</option><option>Sharjah</option><option>Ajman</option><option>Ras Al Khaimah</option><option>Fujairah</option><option>Umm Al Quwain</option>
+      </select>
+      <input id="minPrice" placeholder="Min price" onkeyup="render()">
+      <input id="maxPrice" placeholder="Max price" onkeyup="render()">
+      <i class="fas fa-sliders" style="color:#002f34; opacity:0.6;"></i>
+    </div>
+
+    <!-- PROPERTY GRID -->
+    <div id="propertyList" class="grid"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-logo">
+      <img src="image.png" alt="AEON">
+    </div>
+    <div class="footer-links">
+      <div class="footer-col"><h4>Discover</h4><a href="#">Dubai</a><a href="#">Abu Dhabi</a><a href="#">Sharjah</a><a href="#">All Emirates</a></div>
+      <div class="footer-col"><h4>Support</h4><a href="#">Contact</a><a href="#">Privacy</a><a href="#">Terms</a></div>
+    </div>
+    <div class="footer-social"><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-youtube"></i></a><a href="#"><i class="fab fa-whatsapp"></i></a></div>
+  </div>
+  <div class="footer-bottom">&copy; 2025 AEON properties — approval workflow</div>
+</footer>
+
+<script>
+  let currentUser = null;
+  const users = [
+    { u: "admin", p: "admin123", role: "admin" },
+    { u: "user", p: "user123", role: "user" }
+  ];
+
+  function login() {
+    const found = users.find(x => x.u === username.value && x.p === password.value);
+    if (!found) return alert("Invalid credentials");
+
+    currentUser = found;
+    document.getElementById('loginPage').style.display = "none";
+    document.getElementById('app').style.display = "block";
+    document.getElementById('addBox').style.display = "none";
+    render();
+  }
+
+  function logout() { location.reload(); }
+  function showLogin() { document.getElementById('loginPage').style.display = "block"; }
+
+  function handleUploadClick() {
+    if (!currentUser) return alert("Please login first (use user/user123)");
+    if (currentUser.role !== "user") return alert("Only user role can upload property");
+    const addBox = document.getElementById('addBox');
+    if (addBox.style.display === "none" || addBox.style.display === "") {
+      addBox.style.display = "block";
+      addBox.scrollIntoView({ behavior: 'smooth' });
+    } else { addBox.style.display = "none"; }
+  }
+
+  function showAllProperties() {
+    document.getElementById('filterCity').value = '';
+    document.getElementById('minPrice').value = '';
+    document.getElementById('maxPrice').value = '';
+    render();
+  }
+
+  // LOCAL STORAGE (each property gets "approved" flag, default false)
+  function getData() { return JSON.parse(localStorage.getItem("props") || "[]"); }
+  function saveData(d) { localStorage.setItem("props", JSON.stringify(d)); }
+
+  function getBase64(file) {
+    return new Promise((res) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // add property – always pending (approved: false)
+  async function addProperty() {
+    if (!currentUser || currentUser.role !== "user") return alert("Only user role can add property");
+    const file = document.getElementById('imageUpload').files[0];
+    if (!file) return alert("Please upload an image");
+
+    const img = await getBase64(file);
+
+    const data = getData();
+    data.unshift({
+      id: Date.now(),
+      title: title.value,
+      city: city.value,
+      area: area.value,
+      type: type.value,
+      price: price.value,
+      rent: rent.value,
+      desc: desc.value,
+      balcony: balcony.value,
+      attached: attached.value,
+      kids: kids.value,
+      bachelors: bachelors.value,
+      phone: phone.value,
+      image: img,
+      location: location.value,
+      time: Date.now(),
+      approved: false               // <── pending approval
+    });
+
+    saveData(data);
+    // clear form
+    title.value = ''; city.value = 'Dubai'; area.value = ''; type.value = 'Studio'; price.value = ''; rent.value = 'Monthly';
+    desc.value = ''; balcony.value = 'Balcony No'; attached.value = 'Attached Washroom No'; kids.value = 'Kids No'; bachelors.value = 'Bachelors No';
+    phone.value = ''; location.value = ''; document.getElementById('imageUpload').value = '';
+    render();
+    alert("✅ Property submitted for admin approval.");
+  }
+
+  // admin approve / disapprove (actually we can set approved = true)
+  function approveProperty(id) {
+    if (!currentUser || currentUser.role !== "admin") return alert("Admin only");
+    let data = getData();
+    const idx = data.findIndex(x => x.id === id);
+    if (idx !== -1) {
+      data[idx].approved = true;
+      saveData(data);
+      render();
+    }
+  }
+
+  // admin decline = remove from list entirely (or you could mark as rejected, but for simplicity delete)
+  function declineProperty(id) {
+    if (!currentUser || currentUser.role !== "admin") return alert("Admin only");
+    let data = getData().filter(x => x.id !== id);
+    saveData(data);
+    render();
+  }
+
+  function deleteProp(id) {
+    if (!currentUser || currentUser.role !== "admin") return alert("Admin only");
+    saveData(getData().filter(x => x.id !== id));
+    render();
+  }
+
+  // social share
+  function socialShare(platform, title, locationUrl) {
+    let shareUrl = '';
+    const text = encodeURIComponent('Check this property: ' + title + ' - ' + locationUrl);
+    const url = encodeURIComponent(locationUrl || window.location.href);
+    switch (platform) {
+      case 'whatsapp': shareUrl = `https://wa.me/?text=${text}`; break;
+      case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`; break;
+      case 'telegram': shareUrl = `https://t.me/share/url?url=${url}&text=${text}`; break;
+      case 'twitter': shareUrl = `https://twitter.com/intent/tweet?text=${text}`; break;
+      case 'linkedin': shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`; break;
+      default: return;
+    }
+    window.open(shareUrl, '_blank', 'width=700,height=500');
+  }
+
+  // DOWNLOAD full details as .txt with image included? For simplicity, we create a detailed text file.
+  function downloadFullProperty(property) {
+    const details = 
+`PROPERTY DETAILS
+════════════════
+Title: ${property.title}
+Location: ${property.city} - ${property.area}
+Type: ${property.type} | ${property.rent}
+Price: AED ${property.price}
+Description: ${property.desc}
+Features: 
+  • Balcony: ${property.balcony}
+  • Attached washroom: ${property.attached}
+  • Kids allowed: ${property.kids}
+  • Bachelors: ${property.bachelors}
+Owner phone: ${property.phone}
+Map link: ${property.location}
+Image: (included as base64 inside the downloaded html – but we also provide image download separately)
+`;
+    // create a blob with details
+    const blob = new Blob([details], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (property.title || 'property') + '_details.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // also trigger image download
+    downloadImg(property.image, property.title + '_image');
+  }
+
+  function downloadImg(url, title = 'property') {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = title.replace(/\s+/g, '_') + '.jpg';
+    a.click();
+  }
+
+  // RENDER with approval logic
+  function render() {
+    let data = getData().sort((a, b) => b.time - a.time);
+
+    // FILTER by city/price (applies to all views)
+    const filterCity = document.getElementById('filterCity').value;
+    if (filterCity) data = data.filter(x => x.city === filterCity);
+    const min = document.getElementById('minPrice').value;
+    if (min) data = data.filter(x => +x.price >= +min);
+    const max = document.getElementById('maxPrice').value;
+    if (max) data = data.filter(x => +x.price <= +max);
+
+    // Role-based visibility: admin sees all; user sees only approved === true
+    let visibleData = data;
+    if (currentUser) {
+      if (currentUser.role === 'user') {
+        visibleData = data.filter(p => p.approved === true);
+      } // admin sees all (including pending)
+    } else {
+      // not logged in? show nothing (or you could show only approved, but require login? we follow: not logged in sees nothing)
+      visibleData = [];
+    }
+
+    const list = document.getElementById('propertyList');
+
+    if (!visibleData.length) {
+      list.innerHTML = `<div style="grid-column:1/-1; background:white; border-radius:48px; padding:3rem; text-align:center; color:#3b6e7c;"><i class="fas fa-tree" style="font-size:3rem; opacity:0.4;"></i><h3>No properties ${currentUser?.role==='user'? 'approved yet' : ''}</h3></div>`;
+      return;
+    }
+
+    list.innerHTML = visibleData.map(x => {
+      const features = [];
+      if (x.balcony?.includes('Yes')) features.push('🌿 balcony');
+      if (x.attached?.includes('Yes')) features.push('🚽 attached');
+      if (x.kids?.includes('Yes')) features.push('👪 kids');
+      if (x.bachelors?.includes('Yes')) features.push('🧑 bachelors');
+      const featStr = features.join(' · ') || 'standard';
+
+      const isPending = !x.approved && currentUser?.role === 'admin';
+
+      return `
+      <div class="card">
+        <div class="card-img">
+          <img src="${x.image}" alt="property">
+          <span class="badge">${x.rent || 'Sale'}</span>
+          ${isPending ? '<span class="pending-badge">⏳ pending</span>' : ''}
+        </div>
+        <div class="card-body">
+          <div class="price">AED ${(+x.price).toLocaleString()} <small>/${x.rent}</small></div>
+          <div class="prop-title">${x.title || 'Listing'}</div>
+          <div class="prop-loc"><i class="fas fa-map-pin"></i> ${x.city} · ${x.area || 'central'}</div>
+          <div class="specs"><span><i class="fas fa-door-open"></i> ${x.type}</span> <span><i class="fas fa-tag"></i> ${featStr}</span></div>
+          <div style="font-size:0.9rem; color:#235e6b;">${x.desc?.substring(0,50)}${x.desc?.length > 50 ? '…' : ''}</div>
+
+          <div class="actions">
+            <button onclick="window.open('${x.location}','_blank')"><i class="fas fa-map-location-dot"></i> map</button>
+            <!-- Download full details (calls downloadFullProperty) -->
+            <button onclick='downloadFullProperty(${JSON.stringify(x).replace(/'/g, "\\'")})'><i class="fas fa-download"></i> full+img</button>
+            
+            <span class="social-share">
+              <a href="#" onclick="event.preventDefault();socialShare('whatsapp','${x.title}','${x.location}')"><i class="fab fa-whatsapp"></i></a>
+              <a href="#" onclick="event.preventDefault();socialShare('facebook','${x.title}','${x.location}')"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" onclick="event.preventDefault();socialShare('telegram','${x.title}','${x.location}')"><i class="fab fa-telegram-plane"></i></a>
+            </span>
+
+            ${currentUser?.role === 'admin' && !x.approved ? 
+              `<button class="admin-approve" onclick="approveProperty(${x.id})"><i class="fas fa-check-circle"></i> approve</button>
+               <button onclick="declineProperty(${x.id})" style="background:#ffe6e6;"><i class="fas fa-times-circle"></i> decline</button>` : ''}
+
+            ${currentUser?.role === "admin" ? `<button onclick="deleteProp(${x.id})" style="background:#fff1f1;"><i class="fas fa-trash-can"></i> delete</button>` : ''}
+          </div>
+        </div>
+      </div>
+    `}).join('');
+  }
+
+  // initial seed with some pending + approved
+  (function seed() {
+    if (getData().length === 0) {
+      saveData([
+        { id: 1001, title: 'Palm Jumeirah Studio', city: 'Dubai', area: 'Palm Jumeirah', type: 'Studio', price: '4800', rent: 'Monthly', desc: 'Fully furnished sea view', balcony: 'Balcony Yes', attached: 'Attached Washroom Yes', kids: 'Kids No', bachelors: 'Bachelors No', phone: '+971501234567', image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'150\' viewBox=\'0 0 200 150\'%3E%3Crect width=\'200\' height=\'150\' fill=\'%23002f34\'/%3E%3Ccircle cx=\'100\' cy=\'70\' r=\'30\' fill=\'%232fe0d6\'/%3E%3Ctext x=\'70\' y=\'130\' fill=\'white\' font-size=\'14\'%3EDubai%3C/text%3E%3C/svg%3E', location: 'https://goo.gl/maps/dummy1', time: Date.now() - 100000, approved: true },
+        { id: 1002, title: 'Luxury Villa with pool', city: 'Abu Dhabi', area: 'Saadiyat', type: 'Villa', price: '320000', rent: 'Annually', desc: '4BHK + pool', balcony: 'Balcony Yes', attached: 'Attached Washroom Yes', kids: 'Kids Yes', bachelors: 'Bachelors No', phone: '+971502345678', image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'150\' viewBox=\'0 0 200 150\'%3E%3Crect width=\'200\' height=\'150\' fill=\'%23366d73\'/%3E%3Cpolygon points=\'100,30 150,70 120,120 80,120 50,70\' fill=\'%23f4c542\'/%3E%3C/svg%3E', location: 'https://goo.gl/maps/dummy2', time: Date.now() - 50000, approved: false },  // pending
+        { id: 1003, title: 'Modern Studio', city: 'Sharjah', area: 'Al Majaz', type: 'Studio', price: '2800', rent: 'Monthly', desc: 'Near waterfront', balcony: 'Balcony No', attached: 'Attached Washroom Yes', kids: 'Kids No', bachelors: 'Bachelors Yes', phone: '+971503456789', image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'150\' viewBox=\'0 0 200 150\'%3E%3Crect width=\'200\' height=\'150\' fill=\'%2300755e\'/%3E%3Ccircle cx=\'100\' cy=\'75\' r=\'35\' fill=\'%23ffcc00\'/%3E%3C/svg%3E', location: 'https://goo.gl/maps/dummy3', time: Date.now() - 20000, approved: false } // pending
+      ]);
+    }
+  })();
+</script>
+</body>
+</html>
