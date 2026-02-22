@@ -1,658 +1,2926 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>OLX · UAE property marketplace (approval flow)</title>
-  <!-- Font Awesome 6 (free) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
-    }
-    body {
-      background: #f2f4f5;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    .olx-nav {
-      background-color: #ffffff;
-      box-shadow: 0 2px 6px 0 rgba(0,0,0,0.08);
-      padding: 0.4rem 1rem;
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.5rem 1rem;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      border-bottom: 1px solid #e0e6e9;
-    }
-    .nav-logo img {
-      height: 80px;
-      width: auto;
-      max-width: 160px;
-      object-fit: contain;
-    }
-    .nav-links {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-left: auto;
-    }
-    .nav-btn {
-      background: transparent;
-      border: none;
-      padding: 0.5rem 1.2rem;
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: #2f4f5a;
-      border-radius: 30px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: 0.15s;
-    }
-    .nav-btn i { font-size: 1.2rem; color: #5f8d99; }
-    .nav-btn:hover { background-color: #e7f0f3; color: #002f34; }
-    .nav-btn.upload { background: #002f34; color: white; box-shadow: 0 3px 8px rgba(0,47,52,0.15); }
-    .nav-btn.upload i { color: #2fe0d6; }
-    .nav-btn.upload:hover { background: #14555f; }
-    .auth-buttons {
-      display: flex;
-      gap: 6px;
-      margin-left: 10px;
-    }
-    .auth-btn {
-      background: white;
-      border: 1px solid #cbdde4;
-      padding: 0.4rem 1rem;
-      border-radius: 40px;
-      font-weight: 500;
-      color: #134752;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: 0.15s;
-    }
-    .auth-btn i { margin-right: 4px; color: #008b99; }
-    .auth-btn:hover { background: #ebf4f7; border-color: #009fae; }
-    .container {
-      max-width: 1300px;
-      margin: 0 auto;
-      padding: 1.2rem 0.8rem 2rem;
-      flex: 1;
-      width: 100%;
-    }
-    .login-box {
-      max-width: 480px;
-      margin: 2.5rem auto;
-      background: white;
-      border-radius: 36px;
-      padding: 2.2rem 1.8rem;
-      box-shadow: 0 18px 35px -8px #a0bcc6;
-      border: 1px solid #ffffff;
-    }
-    h3 { font-weight: 600; color: #0f3b44; margin-bottom: 1.2rem; }
-    input, select, textarea {
-      width: 100%;
-      padding: 0.9rem 1.2rem;
-      margin: 8px 0 12px;
-      border-radius: 30px;
-      border: 1.5px solid #d5e3e9;
-      background: #ffffff;
-      font-size: 0.95rem;
-      outline: none;
-      transition: 0.15s;
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: #2fe0d6;
-      box-shadow: 0 0 0 3px #b3f0ec;
-    }
-    .btn-primary {
-      background: #002f34;
-      color: white;
-      border: none;
-      padding: 1rem 1.8rem;
-      width: 100%;
-      border-radius: 40px;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 6px 12px #002f3430;
-      transition: 0.15s;
-    }
-    .btn-primary:hover { background: #18545e; }
-    .filters {
-      background: white;
-      padding: 1rem 1.5rem;
-      border-radius: 60px;
-      box-shadow: 0 2px 10px #d5e0e5;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 1rem;
-      margin: 1.5rem 0 2rem;
-      border: 1px solid #ffffff;
-    }
-    .filters select, .filters input {
-      width: auto;
-      min-width: 150px;
-      margin: 0;
-      background: #f8fbfd;
-      border-radius: 40px;
-      padding: 0.6rem 1.2rem;
-      border: 1px solid #bfd7e2;
-      flex: 1 1 150px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-    .card {
-      background: white;
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 6px 16px -5px #a0bccb;
-      transition: 0.2s ease;
-      border: 1px solid #e1edf2;
-      display: flex;
-      flex-direction: column;
-    }
-    .card:hover { transform: translateY(-5px); box-shadow: 0 18px 30px -8px #7fa1ad; }
-    .card-img {
-      height: 200px;
-      background: #d2e1e9;
-      position: relative;
-      overflow: hidden;
-    }
-    .card-img img { width: 100%; height: 100%; object-fit: cover; }
-    .badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: #002f34e0;
-      backdrop-filter: blur(3px);
-      color: white;
-      padding: 0.2rem 1rem;
-      border-radius: 40px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .pending-badge {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: #f5a623;
-      color: #002f34;
-      padding: 0.2rem 1rem;
-      border-radius: 40px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .card-body { padding: 1.2rem 1rem 1.4rem; flex: 1; }
-    .price { font-weight: 700; font-size: 1.6rem; color: #002f34; line-height: 1.3; }
-    .price small { font-size: 0.9rem; font-weight: 500; color: #3f7b86; }
-    .prop-title { font-weight: 600; font-size: 1.2rem; margin: 0.2rem 0; }
-    .prop-loc { display: flex; align-items: center; gap: 4px; color: #3b6873; font-size: 0.9rem; }
-    .specs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 10px 0;
-      font-size: 0.85rem;
-      background: #f0f6f9;
-      padding: 0.4rem 0.8rem;
-      border-radius: 30px;
-      color: #17525e;
-    }
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 1rem;
-      border-top: 1px solid #dbeaf0;
-      padding-top: 1rem;
-    }
-    .actions button {
-      background: white;
-      border: 1px solid #bdd7e3;
-      padding: 0.4rem 0.8rem;
-      border-radius: 34px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: #0b404b;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .actions button i { color: #008b99; }
-    .social-share {
-      margin-left: auto;
-      display: flex;
-      gap: 5px;
-    }
-    .social-share a {
-      background: #f0f9ff;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: #0b4855;
-      border: 1px solid #b8d6e5;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: 0.1s;
-    }
-    .social-share a:hover { background: #002f34; color: white; border-color: #002f34; }
-    #addBox { display: none; margin-bottom: 2rem; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>UAE Properties - Premium Dashboard</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
 
-    /* admin approve/decline buttons */
-    .admin-approve {
-      background: #e1f7f5 !important;
-      border-color: #2fe0d6 !important;
-      font-weight: 600;
-    }
+        :root {
+            --primary: #c9a227;
+            --primary-dark: #b48a1a;
+            --bg-primary: #0b1423;
+            --bg-secondary: #141f33;
+            --bg-card: #ffffff;
+            --border: #2a3b57;
+            --text-primary: #ffffff;
+            --text-secondary: #fef3c7;
+            --text-muted: #9aa8b9;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --gold: #fbbf24;
+            --card-text: #000000;  /* Changed from #333333 to pure black */
+        }
 
-    /* ===== FOOTER ===== */
-    .footer {
-      background: #ffffff;
-      border-top: 1px solid #d9e5eb;
-      padding: 2rem 1rem 1.5rem;
-      margin-top: 3rem;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.02);
-    }
-    .footer-content {
-      max-width: 1300px;
-      margin: 0 auto;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
-    }
-    .footer-logo img { height: 80px; width: auto; max-width: 180px; object-fit: contain; }
-    .footer-links { display: flex; flex-wrap: wrap; gap: 2rem; }
-    .footer-col { min-width: 120px; }
-    .footer-col h4 { color: #002f34; font-size: 1rem; margin-bottom: 0.8rem; font-weight: 600; }
-    .footer-col a { display: block; color: #366f7c; text-decoration: none; font-size: 0.9rem; margin-bottom: 0.4rem; }
-    .footer-col a:hover { color: #002f34; text-decoration: underline; }
-    .footer-social { display: flex; gap: 1rem; font-size: 1.3rem; color: #2e6b79; }
-    .footer-social a { color: #2e6b79; transition: 0.15s; }
-    .footer-social a:hover { color: #002f34; transform: scale(1.1); }
-    .footer-bottom {
-      max-width: 1300px;
-      margin: 1.5rem auto 0;
-      padding-top: 1.2rem;
-      border-top: 1px solid #e4eef2;
-      text-align: center;
-      color: #4b7e8b;
-      font-size: 0.85rem;
-    }
-    @media (max-width: 600px) {
-      .olx-nav { padding: 0.6rem 0.8rem; }
-      .nav-logo img { height: 36px; }
-      .nav-links { order: 3; width: 100%; justify-content: space-between; margin-top: 6px; }
-      .auth-buttons { margin-left: 0; width: 100%; justify-content: flex-end; }
-      .filters { border-radius: 30px; padding: 1rem; }
-      .footer-content { flex-direction: column; text-align: center; }
-      .footer-links { justify-content: center; }
-    }
-  </style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+            border: 2px solid var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* For Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) var(--bg-secondary);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Login Page Styles */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            position: relative;
+            overflow: hidden;
+            padding: 1rem;
+        }
+
+        .login-page::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(201,162,39,0.1) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .login-container {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 30px rgba(201,162,39,0.1);
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 1.5rem;
+            }
+            
+            .login-container h1 {
+                font-size: 1.5rem;
+            }
+            
+            .login-tabs {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        .login-container h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .login-container .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .login-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--card-text);
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .login-tab.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(201,162,39,0.1);
+        }
+
+        .login-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .login-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--card-text);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(201,162,39,0.3);
+        }
+
+        /* Main Dashboard Styles */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        /* Navbar - New Design */
+        .navbar {
+            background: linear-gradient(135deg, #0b1423 0%, #1a2a45 100%);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--primary);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #0b1423;
+            transform: rotate(45deg);
+            transition: all 0.3s;
+        }
+
+        .logo-icon i {
+            transform: rotate(-45deg);
+        }
+
+        .logo-icon:hover {
+            transform: rotate(90deg);
+            background: #fff;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary) 0%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text span {
+            font-size: 1rem;
+            display: block;
+            color: var(--text-muted);
+            background: none;
+            -webkit-text-fill-color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+            
+            .logo-text {
+                font-size: 1.2rem;
+            }
+            
+            .logo-text span {
+                font-size: 0.8rem;
+            }
+            
+            .logo-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+            
+            .nav-links {
+                order: 3;
+                width: 100%;
+                margin-top: 0.8rem;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .user-info {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 0.5rem;
+                background: rgba(255,255,255,0.1);
+            }
+            
+            .logout-btn {
+                width: 100%;
+                margin-top: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0.5rem;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .nav-link {
+                text-align: center;
+                padding: 0.5rem;
+                background: rgba(255,255,255,0.1);
+                border-radius: 8px;
+                color: #fff;
+            }
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+            transform: translateX(-100%);
+            transition: transform 0.3s;
+        }
+
+        .nav-link:hover::before,
+        .nav-link.active::before {
+            transform: translateX(0);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+            background: rgba(201,162,39,0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50px;
+            border: 2px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, #ffd700 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0b1423;
+            font-weight: bold;
+            border: 2px solid #fff;
+        }
+
+        .user-details {
+            line-height: 1.4;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .user-type {
+            font-size: 0.8rem;
+            color: var(--primary);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: #fff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(239,68,68,0.1);
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+                margin-top: 120px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                margin-top: 180px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                margin-top: 220px;
+            }
+        }
+
+        /* Sidebar Filters */
+        .filters-sidebar {
+            width: 320px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+            border-right: 2px solid var(--border);
+        }
+
+        @media (max-width: 1024px) {
+            .filters-sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1rem;
+            }
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            padding: 1rem 0;
+            z-index: 10;
+        }
+
+        @media (max-width: 480px) {
+            .filters-header {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+        }
+
+        .filters-header h3 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .clear-filters {
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .clear-filters:hover {
+            color: var(--primary);
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .filter-section h4 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-section h4 i {
+            color: var(--primary);
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .filter-options {
+                max-height: 150px;
+            }
+        }
+
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.3rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .filter-checkbox:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .filter-checkbox input[type="checkbox"] {
+            accent-color: var(--primary);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--card-text);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .price-range {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .price-range {
+                flex-direction: column;
+            }
+            
+            .price-range input {
+                width: 100%;
+            }
+        }
+
+        .price-range input {
+            width: 50%;
+            padding: 0.8rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--card-text);
+        }
+
+        .price-range input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.3rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .radio-label:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .radio-label input[type="radio"] {
+            accent-color: var(--primary);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .apply-filters-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            position: sticky;
+            bottom: 1rem;
+        }
+
+        .apply-filters-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(201,162,39,0.3);
+        }
+
+        /* Main Content */
+        .content-area {
+            flex: 1;
+            margin-left: 320px;
+            padding: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .content-area {
+                margin-left: 0;
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content-area {
+                padding: 0.8rem;
+            }
+        }
+
+        /* Upload Form */
+        .upload-form {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .upload-form {
+                padding: 1rem;
+            }
+            
+            .upload-form h2 {
+                font-size: 1.3rem;
+            }
+        }
+
+        .upload-form h2 {
+            color: var(--primary);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+            
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--card-text);
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .image-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg-card);
+        }
+
+        @media (max-width: 480px) {
+            .image-upload-area {
+                padding: 1rem;
+            }
+            
+            .image-upload-area i {
+                font-size: 2rem;
+            }
+        }
+
+        .image-upload-area:hover {
+            border-color: var(--primary);
+        }
+
+        .image-upload-area i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .image-upload-area p {
+            color: var(--text-muted);
+        }
+
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .image-preview {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .image-preview {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 25px;
+            height: 25px;
+            background: var(--danger);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .btn-upload {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-upload:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Properties Header */
+        .properties-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .properties-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.8rem;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .search-box input {
+                width: 100%;
+            }
+        }
+
+        .properties-header h2 {
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            width: 250px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-box i {
+            color: var(--text-muted);
+        }
+
+        /* Properties Grid */
+        .properties-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1200px) {
+            .properties-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Property Card - Updated with black text and AED currency */
+        .property-card {
+            width: 100%;
+            max-width: 900px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 35px rgba(0,0,0,.12);
+            padding: 20px;
+            margin: 0 auto;
+            transition: all 0.3s;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 45px rgba(201,162,39,0.2);
+        }
+
+        /* Header */
+        .card-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .card-header h1 {
+            color: #000000;
+            font-size: 34px;
+            font-weight: 700;
+        }
+
+        .card-header p {
+            color: #333333;
+            font-size: 18px;
+        }
+
+        /* Image Grid */
+        .grid-main {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .grid-bottom {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .right-column {
+            display: grid;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .img {
+            position: relative;
+        }
+
+        .img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .label {
+            position: absolute;
+            bottom: 10px;
+            left: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            text-shadow: 0 2px 6px rgba(0,0,0,.6);
+        }
+
+        /* Price Row */
+        .price-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin: 18px 0;
+            flex-wrap: wrap;
+        }
+
+        .price {
+            background: #0c3554;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .title {
+            font-size: 28px;
+            color: #000000;
+            font-weight: 600;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 18px;
+            align-items: center;
+        }
+
+        .info-box {
+            font-size: 18px;
+            color: #000000;
+        }
+
+        .info-box b {
+            display: block;
+            color: #000000;
+        }
+
+        .info-box a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        .info-box a:hover {
+            text-decoration: underline;
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .feature {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #000000;
+        }
+
+        .feature i {
+            color: #c9a227;
+        }
+
+        /* Contact */
+        .contact {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .numbers {
+            font-size: 20px;
+            color: #000000;
+        }
+
+        .numbers i {
+            margin-right: 8px;
+            color: #c9a227;
+        }
+
+        .numbers div {
+            color: #000000;
+        }
+
+        .btns {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .contact-btn {
+            background: linear-gradient(#d6a96b, #b88945);
+        }
+
+        .download-btn {
+            background: #0c3554;
+        }
+
+        /* Status badge for admin */
+        .status-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+
+        .status-badge.approved {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-badge.pending {
+            background: #f59e0b;
+            color: white;
+        }
+
+        /* Admin actions */
+        .admin-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .approve-btn,
+        .delete-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .approve-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .approve-btn:hover {
+            background: #059669;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        /* Mobile Responsive */
+        @media(max-width: 768px) {
+            .property-card {
+                width: 100%;
+                padding: 15px;
+            }
+            
+            .grid-main,
+            .grid-bottom {
+                grid-template-columns: 1fr;
+            }
+            
+            .right-column {
+                grid-template-rows: repeat(3, 200px);
+            }
+            
+            .price-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .price {
+                font-size: 24px;
+                padding: 10px 20px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .info-box {
+                font-size: 16px;
+            }
+            
+            .contact {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .btns {
+                width: 100%;
+            }
+            
+            .btn {
+                flex: 1;
+                text-align: center;
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+        }
+
+        @media(max-width: 480px) {
+            .card-header h1 {
+                font-size: 28px;
+            }
+            
+            .card-header p {
+                font-size: 16px;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            .btns {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .numbers {
+                font-size: 18px;
+            }
+        }
+
+        /* Property Modal */
+        .property-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .property-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            max-width: 1000px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1;
+        }
+
+        .modal-close:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+
+        .modal-gallery {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+            padding: 2rem;
+            background: var(--bg-card);
+        }
+
+        @media (max-width: 768px) {
+            .modal-gallery {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+        }
+
+        .main-image {
+            width: 100%;
+            height: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .main-image {
+                height: 300px;
+            }
+        }
+
+        .main-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            height: 400px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .thumbnail-grid {
+                height: 200px;
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 195px;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .thumbnail {
+                height: 100px;
+            }
+        }
+
+        .thumbnail:hover,
+        .thumbnail.active {
+            opacity: 1;
+            border: 2px solid var(--primary);
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-details {
+            padding: 2rem;
+            color: var(--card-text);
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-location {
+            color: #333333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-price {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .modal-specs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 10px;
+        }
+
+        .spec-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #000000;
+        }
+
+        .spec-item i {
+            color: var(--primary);
+        }
+
+        .modal-description {
+            color: #333333;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .modal-amenities {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .amenity-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #000000;
+        }
+
+        .amenity-item i {
+            color: var(--primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-share,
+        .btn-download {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-share {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-share:hover {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .btn-download {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .btn-download:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--border);
+        }
+        .logo-box{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo-img{
+    width:55px;
+    height:55px;
+    object-fit:contain;
+}
+
+.logo-text{
+    font-size:22px;
+    font-weight:700;
+    color:#1f3f5b;
+    line-height:1.1;
+}
+
+.logo-text span{
+    display:block;
+    font-size:13px;
+    font-weight:500;
+    color:#6b7280;
+}
+.header-brand{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.header-logo{
+    width:90px;
+    height:90px;
+    object-fit:contain;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    color:#666;
+    font-size:15px;
+}
+.login-page{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+
+    /* 🔥 Background Image */
+    background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+                url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTi--ILPQ3v9d-cjGr8sLF-OURqyYeGF7HXMw&s') center/cover no-repeat;
+}
+
+/* Glass effect container (recommended) */
+.login-container{
+    background:rgba(255,255,255,0.95);
+    padding:30px;
+    border-radius:14px;
+    width:100%;
+    max-width:420px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
+}
+    </style>
 </head>
 <body>
+    <!-- Login Page -->
+    <div class="login-page" id="loginPage">
+        <div class="login-container">
+           <div class="header-brand">
+    <img src="image.png" alt="UAE Properties Logo" class="header-logo">
 
-<!-- Navbar with image logo -->
-<div class="olx-nav">
-  <div class="nav-logo">
-    <img src="image.png" alt="AEON logo">
-  </div>
-  <div class="nav-links">
-    <button class="nav-btn" onclick="showAllProperties()"><i class="fas fa-list-ul"></i> Property</button>
-    <button class="nav-btn upload" onclick="handleUploadClick()"><i class="fas fa-plus-circle"></i> Upload Property</button>
-    <div class="auth-buttons">
-      <button class="auth-btn" onclick="showLogin()"><i class="fas fa-key"></i> Login</button>
-      <button class="auth-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-    </div>
-  </div>
+    <h1>UAE Properties</h1>
+    <p class="subtitle">Premium Property Portal</p>
 </div>
-
-<div class="container">
-  <!-- LOGIN PAGE -->
-  <div id="loginPage" class="login-box">
-    <h3><i class="fas fa-lock-open" style="color:#2fe0d6;"></i> Agent access</h3>
-    <input id="username" placeholder="Username" value="admin">
-    <input id="password" type="password" placeholder="Password" value="admin123">
-    <button class="btn-primary" onclick="login()"><i class="fas fa-arrow-right-to-bracket"></i> secure login</button>
-    <div style="text-align:center; margin-top:1rem; color:#2b6c7a;"><i class="fas fa-circle-info"></i> admin/admin123 • user/user123</div>
-  </div>
-
-  <!-- MAIN APP (hidden initially) -->
-  <div id="app" style="display: none">
-    <!-- ADD PROPERTY CARD (only for user) -->
-    <div id="addBox" class="login-box" style="display: none; max-width:800px;">
-      <h3><i class="fas fa-upload" style="color:#2fe0d6;"></i> List new property</h3>
-      <div style="display:grid; gap:0.5rem 1rem; grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
-        <input id="title" placeholder="Title e.g. Marina View">
-        <select id="city"><option>Dubai</option><option>Abu Dhabi</option><option>Sharjah</option><option>Ajman</option><option>Ras Al Khaimah</option><option>Fujairah</option><option>Umm Al Quwain</option></select>
-        <input id="area" placeholder="District / community">
-        <select id="type"><option>Bed Space</option><option>Partition</option><option>Room</option><option>Hall</option><option>Studio</option><option>1 BHK</option><option>2 BHK</option><option>3 BHK</option><option>Villa</option><option>Shop</option><option>Office</option><option>Warehouse</option><option>Parking</option></select>
-        <input id="price" placeholder="Price (AED)">
-        <select id="rent"><option>Per Hour</option><option>Per Day</option><option>Monthly</option><option>Annually</option><option>Sale</option></select>
-      </div>
-      <textarea id="desc" rows="2" placeholder="Full description ..."></textarea>
-      <div style="display:flex; flex-wrap:wrap; gap:8px; margin:6px 0">
-        <select id="balcony" style="flex:1"><option>Balcony No</option><option>Balcony Yes</option></select>
-        <select id="attached" style="flex:1"><option>Attached Washroom No</option><option>Attached Washroom Yes</option></select>
-        <select id="kids" style="flex:1"><option>Kids No</option><option>Kids Yes</option></select>
-        <select id="bachelors" style="flex:1"><option>Bachelors No</option><option>Bachelors Yes</option></select>
-      </div>
-      <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center">
-        <input id="phone" placeholder="Owner phone (private)" style="flex:2">
-        <input type="file" id="imageUpload" accept="image/*" style="flex:3">
-      </div>
-      <input id="location" placeholder="Google Maps link">
-      <button class="btn-primary" onclick="addProperty()"><i class="fas fa-cloud-upload-alt"></i> submit for approval</button>
-      <p style="font-size:0.8rem; margin-top:6px;"><i class="fas fa-clock"></i> Property will be visible after admin approves</p>
-    </div>
-
-    <!-- FILTERS -->
-    <div class="filters">
-      <select id="filterCity" onchange="render()">
-        <option value="">All Emirates</option>
-        <option>Dubai</option><option>Abu Dhabi</option><option>Sharjah</option><option>Ajman</option><option>Ras Al Khaimah</option><option>Fujairah</option><option>Umm Al Quwain</option>
-      </select>
-      <input id="minPrice" placeholder="Min price" onkeyup="render()">
-      <input id="maxPrice" placeholder="Max price" onkeyup="render()">
-      <i class="fas fa-sliders" style="color:#002f34; opacity:0.6;"></i>
-    </div>
-
-    <!-- PROPERTY GRID -->
-    <div id="propertyList" class="grid"></div>
-  </div>
-</div>
-
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-content">
-    <div class="footer-logo">
-      <img src="image.png" alt="AEON">
-    </div>
-    <div class="footer-links">
-      <div class="footer-col"><h4>Discover</h4><a href="#">Dubai</a><a href="#">Abu Dhabi</a><a href="#">Sharjah</a><a href="#">All Emirates</a></div>
-      <div class="footer-col"><h4>Support</h4><a href="#">Contact</a><a href="#">Privacy</a><a href="#">Terms</a></div>
-    </div>
-    <div class="footer-social"><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-youtube"></i></a><a href="#"><i class="fab fa-whatsapp"></i></a></div>
-  </div>
-  <div class="footer-bottom">&copy; 2025 AEON properties — approval workflow</div>
-</footer>
-
-<script>
-  let currentUser = null;
-  const users = [
-    { u: "admin", p: "admin123", role: "admin" },
-    { u: "user", p: "user123", role: "user" }
-  ];
-
-  function login() {
-    const found = users.find(x => x.u === username.value && x.p === password.value);
-    if (!found) return alert("Invalid credentials");
-
-    currentUser = found;
-    document.getElementById('loginPage').style.display = "none";
-    document.getElementById('app').style.display = "block";
-    document.getElementById('addBox').style.display = "none";
-    render();
-  }
-
-  function logout() { location.reload(); }
-  function showLogin() { document.getElementById('loginPage').style.display = "block"; }
-
-  function handleUploadClick() {
-    if (!currentUser) return alert("Please login first (use user/user123)");
-    if (currentUser.role !== "user") return alert("Only user role can upload property");
-    const addBox = document.getElementById('addBox');
-    if (addBox.style.display === "none" || addBox.style.display === "") {
-      addBox.style.display = "block";
-      addBox.scrollIntoView({ behavior: 'smooth' });
-    } else { addBox.style.display = "none"; }
-  }
-
-  function showAllProperties() {
-    document.getElementById('filterCity').value = '';
-    document.getElementById('minPrice').value = '';
-    document.getElementById('maxPrice').value = '';
-    render();
-  }
-
-  // LOCAL STORAGE (each property gets "approved" flag, default false)
-  function getData() { return JSON.parse(localStorage.getItem("props") || "[]"); }
-  function saveData(d) { localStorage.setItem("props", JSON.stringify(d)); }
-
-  function getBase64(file) {
-    return new Promise((res) => {
-      const reader = new FileReader();
-      reader.onload = () => res(reader.result);
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // add property – always pending (approved: false)
-  async function addProperty() {
-    if (!currentUser || currentUser.role !== "user") return alert("Only user role can add property");
-    const file = document.getElementById('imageUpload').files[0];
-    if (!file) return alert("Please upload an image");
-
-    const img = await getBase64(file);
-
-    const data = getData();
-    data.unshift({
-      id: Date.now(),
-      title: title.value,
-      city: city.value,
-      area: area.value,
-      type: type.value,
-      price: price.value,
-      rent: rent.value,
-      desc: desc.value,
-      balcony: balcony.value,
-      attached: attached.value,
-      kids: kids.value,
-      bachelors: bachelors.value,
-      phone: phone.value,
-      image: img,
-      location: location.value,
-      time: Date.now(),
-      approved: false               // <── pending approval
-    });
-
-    saveData(data);
-    // clear form
-    title.value = ''; city.value = 'Dubai'; area.value = ''; type.value = 'Studio'; price.value = ''; rent.value = 'Monthly';
-    desc.value = ''; balcony.value = 'Balcony No'; attached.value = 'Attached Washroom No'; kids.value = 'Kids No'; bachelors.value = 'Bachelors No';
-    phone.value = ''; location.value = ''; document.getElementById('imageUpload').value = '';
-    render();
-    alert("✅ Property submitted for admin approval.");
-  }
-
-  // admin approve / disapprove (actually we can set approved = true)
-  function approveProperty(id) {
-    if (!currentUser || currentUser.role !== "admin") return alert("Admin only");
-    let data = getData();
-    const idx = data.findIndex(x => x.id === id);
-    if (idx !== -1) {
-      data[idx].approved = true;
-      saveData(data);
-      render();
-    }
-  }
-
-  // admin decline = remove from list entirely (or you could mark as rejected, but for simplicity delete)
-  function declineProperty(id) {
-    if (!currentUser || currentUser.role !== "admin") return alert("Admin only");
-    let data = getData().filter(x => x.id !== id);
-    saveData(data);
-    render();
-  }
-
-  function deleteProp(id) {
-    if (!currentUser || currentUser.role !== "admin") return alert("Admin only");
-    saveData(getData().filter(x => x.id !== id));
-    render();
-  }
-
-  // social share
-  function socialShare(platform, title, locationUrl) {
-    let shareUrl = '';
-    const text = encodeURIComponent('Check this property: ' + title + ' - ' + locationUrl);
-    const url = encodeURIComponent(locationUrl || window.location.href);
-    switch (platform) {
-      case 'whatsapp': shareUrl = `https://wa.me/?text=${text}`; break;
-      case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`; break;
-      case 'telegram': shareUrl = `https://t.me/share/url?url=${url}&text=${text}`; break;
-      case 'twitter': shareUrl = `https://twitter.com/intent/tweet?text=${text}`; break;
-      case 'linkedin': shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`; break;
-      default: return;
-    }
-    window.open(shareUrl, '_blank', 'width=700,height=500');
-  }
-
-  // DOWNLOAD full details as .txt with image included? For simplicity, we create a detailed text file.
-  function downloadFullProperty(property) {
-    const details = 
-`PROPERTY DETAILS
-════════════════
-Title: ${property.title}
-Location: ${property.city} - ${property.area}
-Type: ${property.type} | ${property.rent}
-Price: AED ${property.price}
-Description: ${property.desc}
-Features: 
-  • Balcony: ${property.balcony}
-  • Attached washroom: ${property.attached}
-  • Kids allowed: ${property.kids}
-  • Bachelors: ${property.bachelors}
-Owner phone: ${property.phone}
-Map link: ${property.location}
-Image: (included as base64 inside the downloaded html – but we also provide image download separately)
-`;
-    // create a blob with details
-    const blob = new Blob([details], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (property.title || 'property') + '_details.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-
-    // also trigger image download
-    downloadImg(property.image, property.title + '_image');
-  }
-
-  function downloadImg(url, title = 'property') {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = title.replace(/\s+/g, '_') + '.jpg';
-    a.click();
-  }
-
-  // RENDER with approval logic
-  function render() {
-    let data = getData().sort((a, b) => b.time - a.time);
-
-    // FILTER by city/price (applies to all views)
-    const filterCity = document.getElementById('filterCity').value;
-    if (filterCity) data = data.filter(x => x.city === filterCity);
-    const min = document.getElementById('minPrice').value;
-    if (min) data = data.filter(x => +x.price >= +min);
-    const max = document.getElementById('maxPrice').value;
-    if (max) data = data.filter(x => +x.price <= +max);
-
-    // Role-based visibility: admin sees all; user sees only approved === true
-    let visibleData = data;
-    if (currentUser) {
-      if (currentUser.role === 'user') {
-        visibleData = data.filter(p => p.approved === true);
-      } // admin sees all (including pending)
-    } else {
-      // not logged in? show nothing (or you could show only approved, but require login? we follow: not logged in sees nothing)
-      visibleData = [];
-    }
-
-    const list = document.getElementById('propertyList');
-
-    if (!visibleData.length) {
-      list.innerHTML = `<div style="grid-column:1/-1; background:white; border-radius:48px; padding:3rem; text-align:center; color:#3b6e7c;"><i class="fas fa-tree" style="font-size:3rem; opacity:0.4;"></i><h3>No properties ${currentUser?.role==='user'? 'approved yet' : ''}</h3></div>`;
-      return;
-    }
-
-    list.innerHTML = visibleData.map(x => {
-      const features = [];
-      if (x.balcony?.includes('Yes')) features.push('🌿 balcony');
-      if (x.attached?.includes('Yes')) features.push('🚽 attached');
-      if (x.kids?.includes('Yes')) features.push('👪 kids');
-      if (x.bachelors?.includes('Yes')) features.push('🧑 bachelors');
-      const featStr = features.join(' · ') || 'standard';
-
-      const isPending = !x.approved && currentUser?.role === 'admin';
-
-      return `
-      <div class="card">
-        <div class="card-img">
-          <img src="${x.image}" alt="property">
-          <span class="badge">${x.rent || 'Sale'}</span>
-          ${isPending ? '<span class="pending-badge">⏳ pending</span>' : ''}
-        </div>
-        <div class="card-body">
-          <div class="price">AED ${(+x.price).toLocaleString()} <small>/${x.rent}</small></div>
-          <div class="prop-title">${x.title || 'Listing'}</div>
-          <div class="prop-loc"><i class="fas fa-map-pin"></i> ${x.city} · ${x.area || 'central'}</div>
-          <div class="specs"><span><i class="fas fa-door-open"></i> ${x.type}</span> <span><i class="fas fa-tag"></i> ${featStr}</span></div>
-          <div style="font-size:0.9rem; color:#235e6b;">${x.desc?.substring(0,50)}${x.desc?.length > 50 ? '…' : ''}</div>
-
-          <div class="actions">
-            <button onclick="window.open('${x.location}','_blank')"><i class="fas fa-map-location-dot"></i> map</button>
-            <!-- Download full details (calls downloadFullProperty) -->
-            <button onclick='downloadFullProperty(${JSON.stringify(x).replace(/'/g, "\\'")})'><i class="fas fa-download"></i> full+img</button>
             
-            <span class="social-share">
-              <a href="#" onclick="event.preventDefault();socialShare('whatsapp','${x.title}','${x.location}')"><i class="fab fa-whatsapp"></i></a>
-              <a href="#" onclick="event.preventDefault();socialShare('facebook','${x.title}','${x.location}')"><i class="fab fa-facebook-f"></i></a>
-              <a href="#" onclick="event.preventDefault();socialShare('telegram','${x.title}','${x.location}')"><i class="fab fa-telegram-plane"></i></a>
-            </span>
+            <div class="login-tabs">
+                <div class="login-tab active" onclick="switchLoginTab('user')">User Login</div>
+                <div class="login-tab" onclick="switchLoginTab('admin')">Admin Login</div>
+            </div>
 
-            ${currentUser?.role === 'admin' && !x.approved ? 
-              `<button class="admin-approve" onclick="approveProperty(${x.id})"><i class="fas fa-check-circle"></i> approve</button>
-               <button onclick="declineProperty(${x.id})" style="background:#ffe6e6;"><i class="fas fa-times-circle"></i> decline</button>` : ''}
-
-            ${currentUser?.role === "admin" ? `<button onclick="deleteProp(${x.id})" style="background:#fff1f1;"><i class="fas fa-trash-can"></i> delete</button>` : ''}
-          </div>
+            <div class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="username" placeholder="Enter username" value="user">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Enter password" value="password123">
+                </div>
+                <button class="login-btn" onclick="handleLogin()">Login to Dashboard</button>
+            </div>
         </div>
-      </div>
-    `}).join('');
-  }
+    </div>
 
-  // initial seed with some pending + approved
-  (function seed() {
-    if (getData().length === 0) {
-      saveData([
-        { id: 1001, title: 'Palm Jumeirah Studio', city: 'Dubai', area: 'Palm Jumeirah', type: 'Studio', price: '4800', rent: 'Monthly', desc: 'Fully furnished sea view', balcony: 'Balcony Yes', attached: 'Attached Washroom Yes', kids: 'Kids No', bachelors: 'Bachelors No', phone: '+971501234567', image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'150\' viewBox=\'0 0 200 150\'%3E%3Crect width=\'200\' height=\'150\' fill=\'%23002f34\'/%3E%3Ccircle cx=\'100\' cy=\'70\' r=\'30\' fill=\'%232fe0d6\'/%3E%3Ctext x=\'70\' y=\'130\' fill=\'white\' font-size=\'14\'%3EDubai%3C/text%3E%3C/svg%3E', location: 'https://goo.gl/maps/dummy1', time: Date.now() - 100000, approved: true },
-        { id: 1002, title: 'Luxury Villa with pool', city: 'Abu Dhabi', area: 'Saadiyat', type: 'Villa', price: '320000', rent: 'Annually', desc: '4BHK + pool', balcony: 'Balcony Yes', attached: 'Attached Washroom Yes', kids: 'Kids Yes', bachelors: 'Bachelors No', phone: '+971502345678', image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'150\' viewBox=\'0 0 200 150\'%3E%3Crect width=\'200\' height=\'150\' fill=\'%23366d73\'/%3E%3Cpolygon points=\'100,30 150,70 120,120 80,120 50,70\' fill=\'%23f4c542\'/%3E%3C/svg%3E', location: 'https://goo.gl/maps/dummy2', time: Date.now() - 50000, approved: false },  // pending
-        { id: 1003, title: 'Modern Studio', city: 'Sharjah', area: 'Al Majaz', type: 'Studio', price: '2800', rent: 'Monthly', desc: 'Near waterfront', balcony: 'Balcony No', attached: 'Attached Washroom Yes', kids: 'Kids No', bachelors: 'Bachelors Yes', phone: '+971503456789', image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'150\' viewBox=\'0 0 200 150\'%3E%3Crect width=\'200\' height=\'150\' fill=\'%2300755e\'/%3E%3Ccircle cx=\'100\' cy=\'75\' r=\'35\' fill=\'%23ffcc00\'/%3E%3C/svg%3E', location: 'https://goo.gl/maps/dummy3', time: Date.now() - 20000, approved: false } // pending
-      ]);
-    }
-  })();
-</script>
+    <!-- Main Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <!-- Navbar with Logo -->
+        <nav class="navbar">
+           <div class="logo-box">
+    <img src="image.png" alt="UAE Properties Logo" class="logo-img">
+
+</div>
+            <div class="nav-links">
+                <span class="nav-link active" onclick="showSection('properties')">Properties</span>
+                <span class="nav-link" onclick="showSection('upload')" id="uploadLink">Upload Property</span>
+                <div class="user-info" id="userInfo">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div class="user-details">
+                        <div class="user-name" id="displayName">User</div>
+                        <div class="user-type" id="userType">User</div>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Main Container -->
+        <div class="main-container">
+            <!-- Filters Sidebar -->
+            <div class="filters-sidebar">
+                <div class="filters-header">
+                    <h3><i class="fas fa-filter"></i> Filters</h3>
+                    <span class="clear-filters" onclick="clearAllFilters()">
+                        <i class="fas fa-times"></i> Clear All
+                    </span>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-city"></i> City</h4>
+                    <select class="filter-select" id="filterCity">
+                        <option value="">All Cities</option>
+                        <option value="Dubai">Dubai</option>
+                        <option value="Abu Dhabi">Abu Dhabi</option>
+                        <option value="Sharjah">Sharjah</option>
+                        <option value="Ajman">Ajman</option>
+                        <option value="Ras Al Khaimah">Ras Al Khaimah</option>
+                        <option value="Fujairah">Fujairah</option>
+                        <option value="Umm Al Quwain">Umm Al Quwain</option>
+                    </select>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-map-marker-alt"></i> Area</h4>
+                    <select class="filter-select" id="filterArea">
+                        <option value="">All Areas</option>
+                    </select>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-building"></i> Property Type</h4>
+                    <div class="filter-options" id="propertyTypeFilters">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-money-bill"></i> Price Range (AED)</h4>
+                    <div class="price-range">
+                        <input type="number" id="minPrice" placeholder="Min">
+                        <input type="number" id="maxPrice" placeholder="Max">
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-home"></i> Rental Duration</h4>
+                    <div class="radio-group" id="rentalDurationFilters">
+                        <label class="radio-label">
+                            <input type="radio" name="rentalDuration" value="" checked> Any
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="rentalDuration" value="hourly"> Per Hour
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="rentalDuration" value="daily"> Per Day
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="rentalDuration" value="monthly"> Monthly
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="rentalDuration" value="yearly"> Yearly
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="rentalDuration" value="sale"> For Sale
+                        </label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-check-circle"></i> Amenities</h4>
+                    <div class="filter-options" id="amenityFilters">
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="balcony"> Balcony
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="attachedWashroom"> Attached Washroom
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="window"> Window
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="commonWashroom"> Common Washroom
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="fullClosed"> Full Closed
+                        </label>
+                    </div>
+                </div>
+
+                <button class="apply-filters-btn" onclick="applyFilters()">
+                    <i class="fas fa-search"></i> Apply Filters
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Properties Section -->
+                <div id="propertiesSection">
+                    <div class="properties-header">
+                        <h2><i class="fas fa-building"></i> Available Properties</h2>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Search properties...">
+                        </div>
+                    </div>
+
+                    <div class="properties-grid" id="propertiesGrid">
+                        <!-- Properties will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Upload Section (Hidden by default) -->
+                <div id="uploadSection" style="display: none;">
+                    <div class="upload-form">
+                        <h2><i class="fas fa-upload"></i> Upload New Property</h2>
+                        
+                        <div class="form-grid">
+                            <!-- Property Title -->
+                            <div class="form-group full-width">
+                                <label>Property Title <span style="color: var(--primary);">*</span></label>
+                                <input type="text" id="propertyTitle" placeholder="e.g., Skyline Residencies">
+                            </div>
+
+                            <!-- Location -->
+                            <div class="form-group">
+                                <label>City <span style="color: var(--primary);">*</span></label>
+                                <select id="propertyCity">
+                                    <option value="">Select City</option>
+                                    <option value="Dubai">Dubai</option>
+                                    <option value="Abu Dhabi">Abu Dhabi</option>
+                                    <option value="Sharjah">Sharjah</option>
+                                    <option value="Ajman">Ajman</option>
+                                    <option value="Ras Al Khaimah">Ras Al Khaimah</option>
+                                    <option value="Fujairah">Fujairah</option>
+                                    <option value="Umm Al Quwain">Umm Al Quwain</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Area <span style="color: var(--primary);">*</span></label>
+                                <select id="propertyArea">
+                                    <option value="">Select Area</option>
+                                </select>
+                            </div>
+
+                            <!-- Property Details -->
+                            <div class="form-group">
+                                <label>Property Type <span style="color: var(--primary);">*</span></label>
+                                <select id="propertyType">
+                                    <optgroup label="Residential">
+                                        <option value="Studio Apartment">Studio Apartment</option>
+                                        <option value="Bed Space">Bed Space</option>
+                                        <option value="Partition">Partition</option>
+                                        <option value="Room">Room</option>
+                                        <option value="Hall">Hall</option>
+                                        <option value="Studio">Studio</option>
+                                    </optgroup>
+                                    <optgroup label="Apartments (BHK)">
+                                        <option value="1 BHK">1 BHK</option>
+                                        <option value="2 BHK">2 BHK</option>
+                                        <option value="3 BHK">3 BHK</option>
+                                        <option value="4 BHK">4 BHK</option>
+                                        <option value="5 BHK">5 BHK</option>
+                                    </optgroup>
+                                    <optgroup label="Villas">
+                                        <option value="Villa">Villa</option>
+                                        <option value="1 BHK Villa">1 BHK Villa</option>
+                                        <option value="2 BHK Villa">2 BHK Villa</option>
+                                        <option value="3 BHK Villa">3 BHK Villa</option>
+                                        <option value="4 BHK Villa">4 BHK Villa</option>
+                                        <option value="5 BHK Villa">5 BHK Villa</option>
+                                    </optgroup>
+                                    <optgroup label="Commercial">
+                                        <option value="Warehouse">Warehouse</option>
+                                        <option value="Shop">Shop</option>
+                                        <option value="Office">Office</option>
+                                    </optgroup>
+                                    <optgroup label="Other">
+                                        <option value="Parking">Parking</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="form-group">
+                                <label>Price (AED) <span style="color: var(--primary);">*</span></label>
+                                <input type="number" id="propertyPrice" placeholder="e.g., 280000">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Rental/Sale Type <span style="color: var(--primary);">*</span></label>
+                                <select id="propertyRentalType">
+                                    <option value="hourly">Per Hour</option>
+                                    <option value="daily">Per Day</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                    <option value="sale">For Sale</option>
+                                </select>
+                            </div>
+
+                            <!-- Size -->
+                            <div class="form-group">
+                                <label>Size (Sq Ft) <span style="color: var(--primary);">*</span></label>
+                                <input type="number" id="propertyAreaSize" placeholder="e.g., 500">
+                            </div>
+
+                            <!-- Rooms -->
+                            <div class="form-group">
+                                <label>Bedrooms</label>
+                                <input type="number" id="propertyBedrooms" placeholder="Number of bedrooms" value="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Bathrooms</label>
+                                <input type="number" id="propertyBathrooms" placeholder="Number of bathrooms" value="1">
+                            </div>
+
+                            <!-- Vacancy -->
+                            <div class="form-group">
+                                <label>Vacancy Count (Monthly)</label>
+                                <input type="number" id="propertyVacancy" value="3" readonly>
+                                <small style="color: var(--text-muted);">3 vacancies per month</small>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="form-group full-width">
+                                <label>Description</label>
+                                <textarea id="propertyDescription" placeholder="Detailed description of the property..."></textarea>
+                            </div>
+
+                            <!-- Amenities Section -->
+                            <div class="form-group full-width">
+                                <h3 style="color: var(--primary); margin-bottom: 1rem;">Amenities</h3>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Balcony</label>
+                                <select id="balcony">
+                                    <option value="yes">Yes</option>
+                                    <option value="no" selected>No</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Attached Washroom</label>
+                                <select id="attachedWashroom">
+                                    <option value="yes">Yes</option>
+                                    <option value="no" selected>No</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Window</label>
+                                <select id="window">
+                                    <option value="yes">Yes</option>
+                                    <option value="no" selected>No</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Common Washroom</label>
+                                <select id="commonWashroom">
+                                    <option value="yes">Yes</option>
+                                    <option value="no" selected>No</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Full Closed</label>
+                                <select id="fullClosed">
+                                    <option value="yes">Yes</option>
+                                    <option value="no" selected>No</option>
+                                </select>
+                            </div>
+
+                            <!-- Image Labels for Collage -->
+                            <div class="form-group full-width">
+                                <h3 style="color: var(--primary); margin: 1rem 0;">Image Labels</h3>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Main Image Label</label>
+                                <input type="text" id="mainImageLabel" placeholder="e.g., Studio Apartment">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Second Image Label</label>
+                                <input type="text" id="secondImageLabel" placeholder="e.g., With Window & Balcony">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Third Image Label</label>
+                                <input type="text" id="thirdImageLabel" placeholder="e.g., Maid Room">
+                            </div>
+
+                            <!-- Image Upload -->
+                            <div class="form-group full-width">
+                                <label>Property Images (Max 6 for collage)</label>
+                                <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Click to upload images or drag and drop</p>
+                                    <p style="font-size: 0.8rem;">Upload 6 images for best collage layout</p>
+                                </div>
+                                <input type="file" id="imageInput" multiple accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                                <div class="image-preview" id="imagePreview"></div>
+                            </div>
+
+                            <!-- Contact Numbers -->
+                            <div class="form-group full-width">
+                                <h3 style="color: var(--primary); margin: 1rem 0;">Contact Information</h3>
+                            </div>
+
+                            <div class="form-group">
+                                <label>WhatsApp Number</label>
+                                <input type="text" id="whatsappNumber" placeholder="+971 50 123 4567" value="+971 50 123 4567">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="text" id="phoneNumber" placeholder="+971 4 987 6543" value="+971 4 987 6543">
+                            </div>
+
+                            <!-- Profile Code (Auto-generated) -->
+                            <div class="form-group">
+                                <label>Profile Code</label>
+                                <input type="text" id="profileCode" readonly placeholder="Will be auto-generated">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Location Link</label>
+                                <input type="text" id="locationLink" placeholder="Google Maps link" value="https://www.google.com/maps/search/Marina+Dubai">
+                            </div>
+                        </div>
+
+                        <button class="btn-upload" onclick="uploadProperty()">
+                            <i class="fas fa-upload"></i> Upload Property
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property Details Modal -->
+    <div class="property-modal" id="propertyModal">
+        <div class="modal-content">
+            <div class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </div>
+            
+            <div class="modal-gallery" id="modalGallery">
+                <!-- Gallery will be populated dynamically -->
+            </div>
+
+            <div class="modal-details" id="modalDetails">
+                <!-- Details will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Predefined areas for each city
+        const cityAreas = {
+            'Dubai': ['Downtown Dubai', 'Palm Jumeirah', 'Dubai Marina', 'JLT', 'Business Bay', 'Arabian Ranches', 'Emirates Hills', 'Jumeirah', 'Deira', 'Bur Dubai', 'Al Barsha', 'The Greens', 'Motor City', 'Dubai Silicon Oasis', 'International City', 'Marina Area'],
+            'Abu Dhabi': ['Corniche', 'Al Reem Island', 'Yas Island', 'Saadiyat Island', 'Khalifa City', 'Mohamed Bin Zayed City', 'Al Raha Beach', 'Al Bateen', 'Al Mushrif', 'Al Khalidiyah'],
+            'Sharjah': ['Al Majaz', 'Al Nahda', 'Al Taawun', 'Al Khan', 'Al Qasimia', 'Al Jazzat', 'Al Fisht', 'Al Butina', 'Al Ramtha', 'Al Yarmook'],
+            'Ajman': ['Al Nuaimia', 'Al Rashidiya', 'Al Jurf', 'Al Mowaihat', 'Al Rawda', 'Al Yasmeen', 'Emirates City', 'Al Zahra'],
+            'Ras Al Khaimah': ['Al Hamra Village', 'Al Marjan Island', 'Mina Al Arab', 'Al Jazirah Al Hamra', 'Dafan Al Khor', 'Al Nakheel', 'Al Qurm'],
+            'Fujairah': ['Al Faseel', 'Al Reef', 'Al Maktoum', 'Al Dhad', 'Al Bidiya', 'Al Sakamkam', 'Murbah'],
+            'Umm Al Quwain': ['Al Salamah', 'Al Raas', 'Al Aahad', 'Al Haditha', 'Al Khor', 'Al Sinaiyah']
+        };
+
+        // Property types list
+        const propertyTypes = [
+            'Studio Apartment', 'Bed Space', 'Partition', 'Room', 'Hall', 'Studio',
+            '1 BHK', '2 BHK', '3 BHK', '4 BHK', '5 BHK',
+            'Villa', '1 BHK Villa', '2 BHK Villa', '3 BHK Villa', '4 BHK Villa', '5 BHK Villa',
+            'Warehouse', 'Shop', 'Office', 'Parking'
+        ];
+
+        // Single user credentials
+        const validUser = {
+            username: 'user',
+            password: 'password123'
+        };
+
+        // Admin credentials
+        const validAdmin = {
+            username: 'admin',
+            password: 'admin123'
+        };
+
+        let currentUser = null;
+        let properties = JSON.parse(localStorage.getItem('properties')) || [];
+        let selectedImages = [];
+
+        // Initialize with sample data if empty
+        if (properties.length === 0) {
+            properties = [
+                {
+                    id: 1,
+                    profileCode: '561',
+                    title: 'Skyline Residencies',
+                    city: 'Dubai',
+                    area: 'Marina Area',
+                    type: 'Studio Apartment',
+                    price: 280000,
+                    rentalType: 'sale',
+                    bedrooms: 0,
+                    bathrooms: 1,
+                    areaSize: 500,
+                    description: 'Beautiful studio apartment in prime location with modern amenities.',
+                    amenities: {
+                        balcony: 'yes',
+                        attachedWashroom: 'yes',
+                        window: 'yes',
+                        commonWashroom: 'no',
+                        fullClosed: 'yes'
+                    },
+                    imageLabels: {
+                        main: 'Studio Apartment',
+                        second: 'With Window & Balcony',
+                        third: 'Maid Room'
+                    },
+                    vacancy: 3,
+                    images: [
+                        'https://media.istockphoto.com/id/2155879454/photo/this-is-an-exterior-photo-of-a-home-for-sale-in-beverly-hills-ca.jpg?s=612x612&w=0&k=20&c=uSKacMQvmaYX5Pf5Br7pUfErYQbNt_UWXRTjfwrdSDQ=',
+                        'https://cdn.confident-group.com/wp-content/uploads/2024/12/27102928/types-of-real-estate-cover.jpg',
+                        'https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?cs=srgb&dl=pexels-binyaminmellish-186077.jpg&fm=jpg',
+                        'https://us.123rf.com/450wm/yganko/yganko2402/yganko240221947/224428577-a-home-at-sunset-with-a-garage-attached-to-it.jpg?ver=6',
+                        'https://images.unsplash.com/photo-1560184897-ae75f418493e?w=800',
+                        'https://images.unsplash.com/photo-1560185009-5bf9f2849488?w=800',
+                    ],
+                    contact: {
+                        whatsapp: '+971 50 123 4567',
+                        phone: '+971 4 987 6543'
+                    },
+                    locationLink: 'https://www.google.com/maps/search/Marina+Dubai',
+                    status: 'approved',
+                    userId: 'user',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    profileCode: '562',
+                    title: 'Modern Apartment with Sea View',
+                    city: 'Dubai',
+                    area: 'Dubai Marina',
+                    type: '2 BHK',
+                    price: 180000,
+                    rentalType: 'monthly',
+                    bedrooms: 2,
+                    bathrooms: 3,
+                    areaSize: 1200,
+                    description: 'Modern apartment with breathtaking sea view. Fully furnished with high-end finishes.',
+                    amenities: {
+                        balcony: 'yes',
+                        attachedWashroom: 'yes',
+                        window: 'yes',
+                        commonWashroom: 'no',
+                        fullClosed: 'yes'
+                    },
+                    imageLabels: {
+                        main: 'Living Room',
+                        second: 'Master Bedroom',
+                        third: 'Kitchen'
+                    },
+                    vacancy: 2,
+                    images: [
+                        'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
+                        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800',
+                        'https://images.unsplash.com/photo-1560185009-5bf9f2849488?w=800',
+                        'https://images.unsplash.com/photo-1501183638710-841dd1904471?w=800',
+                        'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=800',
+                        'https://images.unsplash.com/photo-1560184897-ae75f418493e?w=800'
+                    ],
+                    contact: {
+                        whatsapp: '+971 50 123 4567',
+                        phone: '+971 4 987 6543'
+                    },
+                    locationLink: 'https://www.google.com/maps/search/Dubai+Marina',
+                    status: 'approved',
+                    userId: 'user',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: 3,
+                    profileCode: '563',
+                    title: 'Spacious Office Space',
+                    city: 'Abu Dhabi',
+                    area: 'Corniche',
+                    type: 'Office',
+                    price: 350000,
+                    rentalType: 'yearly',
+                    bedrooms: 0,
+                    bathrooms: 2,
+                    areaSize: 2000,
+                    description: 'Prime office location with modern facilities. Perfect for businesses.',
+                    amenities: {
+                        balcony: 'no',
+                        attachedWashroom: 'yes',
+                        window: 'yes',
+                        commonWashroom: 'yes',
+                        fullClosed: 'yes'
+                    },
+                    imageLabels: {
+                        main: 'Office Space',
+                        second: 'Meeting Room',
+                        third: 'Reception'
+                    },
+                    vacancy: 3,
+                    images: [
+                        'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800',
+                        'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800',
+                        'https://images.unsplash.com/photo-1497215842964-222b430dc094?w=800',
+                        'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800',
+                        'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800',
+                        'https://images.unsplash.com/photo-1497215842964-222b430dc094?w=800'
+                    ],
+                    contact: {
+                        whatsapp: '+971 50 123 4567',
+                        phone: '+971 4 987 6543'
+                    },
+                    locationLink: 'https://www.google.com/maps/search/Abu+Dhabi+Corniche',
+                    status: 'pending',
+                    userId: 'user',
+                    createdAt: new Date().toISOString()
+                }
+            ];
+            localStorage.setItem('properties', JSON.stringify(properties));
+        }
+
+        // Login functions
+        function switchLoginTab(type) {
+            document.querySelectorAll('.login-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const type = document.querySelector('.login-tab.active').textContent.includes('User') ? 'user' : 'admin';
+
+            if (!username || !password) {
+                alert('Please enter username and password');
+                return;
+            }
+
+            if (type === 'admin') {
+                if (username === validAdmin.username && password === validAdmin.password) {
+                    currentUser = { username: 'admin', type: 'admin' };
+                } else {
+                    alert('Invalid admin credentials');
+                    return;
+                }
+            } else {
+                if (username === validUser.username && password === validUser.password) {
+                    currentUser = { username: 'user', type: 'user' };
+                } else {
+                    alert('Invalid user credentials. Use: user / password123');
+                    return;
+                }
+            }
+
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            
+            document.getElementById('displayName').textContent = currentUser.username;
+            document.getElementById('userType').textContent = currentUser.type === 'admin' ? 'Administrator' : 'Property User';
+            document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+
+            if (currentUser.type === 'user') {
+                document.getElementById('uploadLink').style.display = 'block';
+            } else {
+                document.getElementById('uploadLink').style.display = 'none';
+            }
+
+            // Generate profile code for upload form
+            document.getElementById('profileCode').value = Math.floor(560 + Math.random() * 100);
+
+            // Populate area dropdowns
+            populateAreaDropdowns();
+            populateFilters();
+            loadProperties();
+        }
+
+        function populateAreaDropdowns() {
+            // For filter area dropdown
+            const filterAreaSelect = document.getElementById('filterArea');
+            document.getElementById('filterCity').addEventListener('change', function() {
+                const city = this.value;
+                filterAreaSelect.innerHTML = '<option value="">All Areas</option>';
+                
+                if (city && cityAreas[city]) {
+                    cityAreas[city].forEach(area => {
+                        filterAreaSelect.innerHTML += `<option value="${area}">${area}</option>`;
+                    });
+                }
+            });
+
+            // For upload form area dropdown
+            const propertyAreaSelect = document.getElementById('propertyArea');
+            document.getElementById('propertyCity').addEventListener('change', function() {
+                const city = this.value;
+                propertyAreaSelect.innerHTML = '<option value="">Select Area</option>';
+                
+                if (city && cityAreas[city]) {
+                    cityAreas[city].forEach(area => {
+                        propertyAreaSelect.innerHTML += `<option value="${area}">${area}</option>`;
+                    });
+                }
+            });
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('username').value = 'user';
+            document.getElementById('password').value = 'password123';
+        }
+
+        // Section switching
+        function showSection(section) {
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (section === 'properties') {
+                document.getElementById('propertiesSection').style.display = 'block';
+                document.getElementById('uploadSection').style.display = 'none';
+                loadProperties();
+            } else {
+                if (!currentUser || currentUser.type !== 'user') {
+                    alert('Only users can upload properties');
+                    return;
+                }
+                document.getElementById('propertiesSection').style.display = 'none';
+                document.getElementById('uploadSection').style.display = 'block';
+                // Generate new profile code
+                document.getElementById('profileCode').value = Math.floor(560 + Math.random() * 100);
+            }
+        }
+
+        // Populate filters
+        function populateFilters() {
+            // Property types filters
+            const typeContainer = document.getElementById('propertyTypeFilters');
+            typeContainer.innerHTML = '';
+            propertyTypes.forEach(type => {
+                typeContainer.innerHTML += `
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="${type}"> ${type}
+                    </label>
+                `;
+            });
+        }
+
+        // Handle image upload
+        function handleImageUpload(event) {
+            const files = Array.from(event.target.files);
+            selectedImages = [...selectedImages, ...files].slice(0, 6);
+            
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            
+            selectedImages.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML += `
+                        <div class="preview-item">
+                            <img src="${e.target.result}" alt="Preview">
+                            <div class="remove-image" onclick="removeImage(${index})">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeImage(index) {
+            selectedImages.splice(index, 1);
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            selectedImages.forEach((file, i) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML += `
+                        <div class="preview-item">
+                            <img src="${e.target.result}" alt="Preview">
+                            <div class="remove-image" onclick="removeImage(${i})">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Upload property
+        function uploadProperty() {
+            if (!currentUser || currentUser.type !== 'user') {
+                alert('Please login as user to upload properties');
+                return;
+            }
+
+            const imageUrls = selectedImages.map(img => URL.createObjectURL(img));
+            
+            // If no images uploaded, use placeholders
+            if (imageUrls.length === 0) {
+                imageUrls.push(
+                    'https://images.unsplash.com/photo-1501183638710-841dd1904471?w=800',
+                    'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800',
+                    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800',
+                    'https://images.unsplash.com/photo-1560448075-bb4caa6c0c39?w=800',
+                    'https://images.unsplash.com/photo-1560184897-ae75f418493e?w=800',
+                    'https://images.unsplash.com/photo-1560185009-5bf9f2849488?w=800'
+                );
+            }
+
+            const newProperty = {
+                id: Date.now(),
+                profileCode: document.getElementById('profileCode').value || Math.floor(560 + Math.random() * 100),
+                title: document.getElementById('propertyTitle').value,
+                city: document.getElementById('propertyCity').value,
+                area: document.getElementById('propertyArea').value,
+                type: document.getElementById('propertyType').value,
+                price: parseFloat(document.getElementById('propertyPrice').value),
+                rentalType: document.getElementById('propertyRentalType').value,
+                bedrooms: parseInt(document.getElementById('propertyBedrooms').value) || 0,
+                bathrooms: parseInt(document.getElementById('propertyBathrooms').value) || 1,
+                areaSize: parseFloat(document.getElementById('propertyAreaSize').value) || 0,
+                description: document.getElementById('propertyDescription').value,
+                amenities: {
+                    balcony: document.getElementById('balcony').value,
+                    attachedWashroom: document.getElementById('attachedWashroom').value,
+                    window: document.getElementById('window').value,
+                    commonWashroom: document.getElementById('commonWashroom').value,
+                    fullClosed: document.getElementById('fullClosed').value
+                },
+                imageLabels: {
+                    main: document.getElementById('mainImageLabel').value || 'Property Image',
+                    second: document.getElementById('secondImageLabel').value || 'Additional View',
+                    third: document.getElementById('thirdImageLabel').value || 'More Details'
+                },
+                vacancy: 3,
+                images: imageUrls.slice(0, 6),
+                contact: {
+                    whatsapp: document.getElementById('whatsappNumber').value || '+971 50 123 4567',
+                    phone: document.getElementById('phoneNumber').value || '+971 4 987 6543'
+                },
+                locationLink: document.getElementById('locationLink').value || 'https://www.google.com/maps',
+                status: 'pending',
+                userId: currentUser.username,
+                createdAt: new Date().toISOString()
+            };
+
+            // Validate required fields
+            if (!newProperty.title || !newProperty.city || !newProperty.area || !newProperty.type || !newProperty.price) {
+                alert('Please fill all required fields');
+                return;
+            }
+
+            properties.push(newProperty);
+            localStorage.setItem('properties', JSON.stringify(properties));
+            
+            alert('Property uploaded successfully! Waiting for admin approval.');
+            showSection('properties');
+            selectedImages = [];
+            document.getElementById('imagePreview').innerHTML = '';
+            
+            // Clear form
+            document.getElementById('propertyTitle').value = '';
+            document.getElementById('propertyCity').value = '';
+            document.getElementById('propertyArea').innerHTML = '<option value="">Select Area</option>';
+            document.getElementById('propertyType').value = '';
+            document.getElementById('propertyPrice').value = '';
+            document.getElementById('propertyDescription').value = '';
+            document.getElementById('mainImageLabel').value = '';
+            document.getElementById('secondImageLabel').value = '';
+            document.getElementById('thirdImageLabel').value = '';
+        }
+
+        // Apply filters
+        function applyFilters() {
+            let filtered = [...properties];
+
+            // City filter
+            const city = document.getElementById('filterCity').value;
+            if (city) {
+                filtered = filtered.filter(p => p.city === city);
+            }
+
+            // Area filter
+            const area = document.getElementById('filterArea').value;
+            if (area) {
+                filtered = filtered.filter(p => p.area === area);
+            }
+
+            // Property type filters
+            const typeCheckboxes = document.querySelectorAll('#propertyTypeFilters input:checked');
+            if (typeCheckboxes.length > 0) {
+                const selectedTypes = Array.from(typeCheckboxes).map(cb => cb.value);
+                filtered = filtered.filter(p => selectedTypes.includes(p.type));
+            }
+
+            // Price range
+            const minPrice = parseFloat(document.getElementById('minPrice').value);
+            const maxPrice = parseFloat(document.getElementById('maxPrice').value);
+            if (minPrice) {
+                filtered = filtered.filter(p => p.price >= minPrice);
+            }
+            if (maxPrice) {
+                filtered = filtered.filter(p => p.price <= maxPrice);
+            }
+
+            // Rental duration
+            const rentalDuration = document.querySelector('input[name="rentalDuration"]:checked')?.value;
+            if (rentalDuration) {
+                filtered = filtered.filter(p => p.rentalType === rentalDuration);
+            }
+
+            // Amenities
+            const balconyCheck = document.querySelector('input[value="balcony"]')?.checked;
+            if (balconyCheck) {
+                filtered = filtered.filter(p => p.amenities.balcony === 'yes');
+            }
+            
+            const attachedWashroomCheck = document.querySelector('input[value="attachedWashroom"]')?.checked;
+            if (attachedWashroomCheck) {
+                filtered = filtered.filter(p => p.amenities.attachedWashroom === 'yes');
+            }
+            
+            const windowCheck = document.querySelector('input[value="window"]')?.checked;
+            if (windowCheck) {
+                filtered = filtered.filter(p => p.amenities.window === 'yes');
+            }
+            
+            const commonWashroomCheck = document.querySelector('input[value="commonWashroom"]')?.checked;
+            if (commonWashroomCheck) {
+                filtered = filtered.filter(p => p.amenities.commonWashroom === 'yes');
+            }
+            
+            const fullClosedCheck = document.querySelector('input[value="fullClosed"]')?.checked;
+            if (fullClosedCheck) {
+                filtered = filtered.filter(p => p.amenities.fullClosed === 'yes');
+            }
+
+            // Search
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm) {
+                filtered = filtered.filter(p => 
+                    p.title.toLowerCase().includes(searchTerm) ||
+                    p.description.toLowerCase().includes(searchTerm) ||
+                    p.city.toLowerCase().includes(searchTerm) ||
+                    p.area.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Show only approved for users, all for admin
+            if (!currentUser || currentUser.type !== 'admin') {
+                filtered = filtered.filter(p => p.status === 'approved');
+            }
+
+            displayProperties(filtered);
+        }
+
+        // Load properties
+        function loadProperties() {
+            applyFilters();
+        }
+
+        // Display properties with card.html design
+        function displayProperties(propertiesToShow) {
+            const grid = document.getElementById('propertiesGrid');
+            
+            if (propertiesToShow.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>No properties found</h3>
+                        <p>Try adjusting your filters or search criteria</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = propertiesToShow.map(prop => {
+                const images = prop.images || [];
+                const imageLabels = prop.imageLabels || { main: 'Studio Apartment', second: 'Additional View', third: 'More Details' };
+                // Updated currency to AED
+                const priceDisplay = prop.rentalType === 'sale' ? `AED ${prop.price.toLocaleString()}` : `AED ${prop.price.toLocaleString()}`;
+                const rentalSuffix = prop.rentalType !== 'sale' ? ` / ${prop.rentalType}` : '';
+                
+                return `
+                    <div class="property-card" onclick="showPropertyDetails(${prop.id})">
+                        <!-- Header -->
+                        <div class="card-header">
+                            <h1>Users Properties UAE</h1>
+                            <p>Profile Code: ${prop.profileCode || '561'}</p>
+                        </div>
+
+                        <!-- TOP -->
+                        <div class="grid-main">
+                            <div class="img">
+                                <img src="${images[0] || 'https://images.unsplash.com/photo-1501183638710-841dd1904471?w=800'}" alt="${prop.title}">
+                                <div class="label">${imageLabels.main || 'Studio Apartment'}</div>
+                            </div>
+                            <div class="img">
+                                <img src="${images[1] || 'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800'}" alt="${prop.title}">
+                            </div>
+                        </div>
+
+                        <!-- BOTTOM -->
+                        <div class="grid-bottom">
+                            <div class="img">
+                                <img src="${images[2] || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'}" alt="${prop.title}">
+                                <div class="label">${imageLabels.main || 'Studio Apartment'}</div>
+                            </div>
+
+                            <div class="right-column">
+                                <div class="img">
+                                    <img src="${images[3] || 'https://images.unsplash.com/photo-1560448075-bb4caa6c0c39?w=800'}" alt="${prop.title}">
+                                    <div class="label">${imageLabels.second || 'With Window & Balcony'}</div>
+                                </div>
+                                <div class="img">
+                                    <img src="${images[4] || 'https://images.unsplash.com/photo-1560184897-ae75f418493e?w=800'}" alt="${prop.title}">
+                                    <div class="label">${imageLabels.third || '1 Kitchen + 1 Maid Room'}</div>
+                                </div>
+                                <div class="img">
+                                    <img src="${images[5] || 'https://images.unsplash.com/photo-1560185009-5bf9f2849488?w=800'}" alt="${prop.title}">
+                                    <div class="label">Maid Room</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PRICE - Updated with AED -->
+                        <div class="price-row">
+                            <div class="price">${priceDisplay}${rentalSuffix}</div>
+                            <div class="title">${prop.title}</div>
+                        </div>
+
+                        <!-- INFO -->
+                        <div class="info-grid">
+                            <div class="info-box">
+                                • Located in<br>
+                                <b><a href="${prop.locationLink || '#'}" target="_blank" onclick="event.stopPropagation()">${prop.area} Area</a></b>
+                            </div>
+                            <div class="info-box">
+                                <b>Type:</b> ${prop.type}
+                            </div>
+                            <div class="info-box">
+                                <b>Size:</b> ${prop.areaSize} Sq Ft
+                            </div>
+                        </div>
+
+                        <!-- FEATURES -->
+                        <div class="features">
+                            ${prop.amenities.window === 'yes' ? 
+                                '<div class="feature"><i class="fa fa-window-maximize"></i> With Window</div>' : ''}
+                            ${prop.amenities.balcony === 'yes' ? 
+                                '<div class="feature"><i class="fa fa-building"></i> With Balcony</div>' : ''}
+                            <div class="feature"><i class="fa fa-location-dot"></i> Prime Location</div>
+                            <div class="feature"><i class="fa fa-bath"></i> ${prop.bathrooms} Washrooms</div>
+                        </div>
+
+                        <!-- CONTACT -->
+                        <div class="contact">
+                            <div class="numbers">
+                                <div><i class="fab fa-whatsapp"></i> ${prop.contact?.whatsapp || '+971 50 123 4567'}</div>
+                                <div><i class="fa fa-phone"></i> ${prop.contact?.phone || '+971 4 987 6543'}</div>
+                            </div>
+
+                            <div class="btns">
+                                <button class="btn contact-btn" onclick="event.stopPropagation(); window.open('https://wa.me/${prop.contact?.whatsapp?.replace(/\D/g, '') || '971501234567'}', '_blank')">
+                                    Contact Now
+                                </button>
+                                <button class="btn download-btn" onclick="event.stopPropagation(); downloadProperty(${prop.id})">
+                                    Download
+                                </button>
+                            </div>
+
+                            <!-- Admin Actions -->
+                            ${currentUser?.type === 'admin' ? `
+                                <div class="admin-actions">
+                                    ${prop.status === 'pending' ? `
+                                        <button class="approve-btn" onclick="event.stopPropagation(); approveProperty(${prop.id})">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                    ` : ''}
+                                    <button class="delete-btn" onclick="event.stopPropagation(); deleteProperty(${prop.id})">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Clear all filters
+        function clearAllFilters() {
+            document.getElementById('filterCity').value = '';
+            document.getElementById('filterArea').innerHTML = '<option value="">All Areas</option>';
+            document.querySelectorAll('#propertyTypeFilters input').forEach(cb => cb.checked = false);
+            document.getElementById('minPrice').value = '';
+            document.getElementById('maxPrice').value = '';
+            document.querySelectorAll('input[name="rentalDuration"]').forEach(rb => rb.checked = false);
+            document.querySelector('input[name="rentalDuration"][value=""]').checked = true;
+            document.querySelectorAll('#amenityFilters input').forEach(cb => cb.checked = false);
+            document.getElementById('searchInput').value = '';
+            
+            applyFilters();
+        }
+
+        // Show property details modal
+        function showPropertyDetails(propertyId) {
+            const property = properties.find(p => p.id === propertyId);
+            if (!property) return;
+
+            const modal = document.getElementById('propertyModal');
+            const gallery = document.getElementById('modalGallery');
+            const details = document.getElementById('modalDetails');
+
+            // Gallery
+            gallery.innerHTML = `
+                <div class="main-image">
+                    <img src="${property.images[0] || 'https://via.placeholder.com/800x600/1a1a1a/c9a227?text=No+Image'}" id="mainModalImage">
+                </div>
+                <div class="thumbnail-grid">
+                    ${property.images.map((img, index) => `
+                        <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeModalImage('${img}', this)">
+                            <img src="${img}" alt="Thumbnail ${index + 1}">
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Amenities list
+            const amenities = [];
+            if (property.amenities.balcony === 'yes') amenities.push('Balcony');
+            if (property.amenities.attachedWashroom === 'yes') amenities.push('Attached Washroom');
+            if (property.amenities.window === 'yes') amenities.push('Window');
+            if (property.amenities.commonWashroom === 'yes') amenities.push('Common Washroom');
+            if (property.amenities.fullClosed === 'yes') amenities.push('Full Closed');
+
+            details.innerHTML = `
+                <h2 class="modal-title">${property.title}</h2>
+                <div class="modal-location">
+                    <i class="fas fa-map-marker-alt"></i> ${property.area}, ${property.city} | Profile Code: ${property.profileCode || 'N/A'}
+                </div>
+                <div class="modal-price">
+                    AED ${property.price.toLocaleString()} ${property.rentalType !== 'sale' ? '/ ' + property.rentalType : ' (Sale)'}
+                </div>
+
+                <div class="modal-specs">
+                    <div class="spec-item">
+                        <i class="fas fa-bed"></i> ${property.bedrooms} Bedrooms
+                    </div>
+                    <div class="spec-item">
+                        <i class="fas fa-bath"></i> ${property.bathrooms} Bathrooms
+                    </div>
+                    <div class="spec-item">
+                        <i class="fas fa-vector-square"></i> ${property.areaSize} sq ft
+                    </div>
+                    <div class="spec-item">
+                        <i class="fas fa-calendar-alt"></i> ${property.vacancy}/3 Vacancies
+                    </div>
+                </div>
+
+                <div class="modal-description">
+                    ${property.description}
+                </div>
+
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">Amenities</h3>
+                <div class="modal-amenities">
+                    ${amenities.map(amenity => `
+                        <div class="amenity-item">
+                            <i class="fas fa-check-circle"></i> ${amenity}
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn-share" onclick="shareProperty(${property.id})">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                    <button class="btn-download" onclick="downloadProperty(${property.id})">
+                        <i class="fas fa-download"></i> Download Details
+                    </button>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function changeModalImage(src, element) {
+            document.getElementById('mainModalImage').src = src;
+            document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('propertyModal').classList.remove('active');
+        }
+
+        // Admin functions
+        function approveProperty(id) {
+            if (!currentUser || currentUser.type !== 'admin') return;
+            
+            properties = properties.map(p => p.id === id ? {...p, status: 'approved'} : p);
+            localStorage.setItem('properties', JSON.stringify(properties));
+            applyFilters();
+        }
+
+        function deleteProperty(id) {
+            if (!currentUser || currentUser.type !== 'admin') return;
+            
+            if (confirm('Are you sure you want to delete this property?')) {
+                properties = properties.filter(p => p.id !== id);
+                localStorage.setItem('properties', JSON.stringify(properties));
+                applyFilters();
+            }
+        }
+
+        // Share and download functions
+        function shareProperty(id) {
+            const property = properties.find(p => p.id === id);
+            if (!property) return;
+
+            const shareText = `
+🏠 ${property.title}
+📍 Location: ${property.area}, ${property.city}
+📋 Profile Code: ${property.profileCode}
+💰 Price: AED ${property.price.toLocaleString()} ${property.rentalType !== 'sale' ? '/ ' + property.rentalType : ''}
+🛏️ Bedrooms: ${property.bedrooms} | 🚽 Bathrooms: ${property.bathrooms} | 📏 Area: ${property.areaSize} sqft
+
+📝 Description:
+${property.description}
+
+✨ Amenities: ${Object.entries(property.amenities).filter(([_, v]) => v === 'yes').map(([k]) => k.replace(/([A-Z])/g, ' $1').trim()).join(', ')}
+
+📞 Contact: ${property.contact?.whatsapp} | ${property.contact?.phone}
+📅 Available: ${property.vacancy}/3 vacancies this month
+            `;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: property.title,
+                    text: shareText,
+                }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(shareText);
+                alert('Property details copied to clipboard!');
+            }
+        }
+
+        function downloadProperty(id) {
+            const property = properties.find(p => p.id === id);
+            if (!property) return;
+
+            const amenities = Object.entries(property.amenities)
+                .filter(([_, v]) => v === 'yes')
+                .map(([k]) => `  • ${k.replace(/([A-Z])/g, ' $1').trim()}`)
+                .join('\n');
+
+            const content = `
+╔══════════════════════════════════════════════╗
+║         UAE PROPERTY DETAILS                 ║
+╚══════════════════════════════════════════════╝
+
+📋 PROPERTY INFORMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Title: ${property.title}
+Location: ${property.area}, ${property.city}
+Profile Code: ${property.profileCode}
+Type: ${property.type}
+Price: AED ${property.price.toLocaleString()} ${property.rentalType !== 'sale' ? '/ ' + property.rentalType : ' (Sale)'}
+
+📐 SPECIFICATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Bedrooms: ${property.bedrooms}
+Bathrooms: ${property.bathrooms}
+Area: ${property.areaSize} sq ft
+Status: ${property.status}
+Vacancies: ${property.vacancy}/3 this month
+
+📝 DESCRIPTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${property.description}
+
+✨ AMENITIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${amenities || '  • No specific amenities'}
+
+📞 CONTACT INFORMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WhatsApp: ${property.contact?.whatsapp}
+Phone: ${property.contact?.phone}
+Location: ${property.locationLink}
+
+📅 LISTING INFORMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Listed on: ${new Date(property.createdAt).toLocaleDateString()}
+Listed by: ${property.userId}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Generated by UAE Properties Portal
+            `;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${property.title.replace(/\s+/g, '_')}_details.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Add search on enter
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+
+        // Initialize
+        populateAreaDropdowns();
+        populateFilters();
+    </script>
 </body>
 </html>
