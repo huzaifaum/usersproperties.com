@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UAE Properties – Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"></noscript>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- Toast -->
+<div id="notificationToast" class="notification-toast">
+    <i class="fas fa-bell"></i>
+    <span id="toastMessage">Done!</span>
+    <span onclick="hideToast()" style="cursor:pointer;margin-left:4px"><i class="fas fa-times"></i></span>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="edit-modal">
+    <div class="edit-modal-content">
+        <div class="edit-modal-close" onclick="closeEditModal()"><i class="fas fa-times"></i></div>
+        <h2 style="color:var(--primary);margin-bottom:20px">Edit Property</h2>
+        <div id="editFormContent"></div>
+    </div>
+</div>
+
+<!-- Timer Modal -->
+<div id="timerEditModal" class="timer-edit-modal">
+    <div class="timer-edit-content">
+        <button class="timer-close-btn" onclick="closeTimerModal()"><i class="fas fa-times"></i></button>
+        <h2><i class="fas fa-clock"></i> Update Timer & Status</h2>
+        <input type="hidden" id="timerPropertyId">
+        <div class="timer-field"><label>Property Status</label>
+            <select id="timerStatus">
+                <option value="rent">For Rent</option><option value="sale">For Sale</option>
+                <option value="under-construction">Under Construction</option><option value="sold-out">Sold Out</option>
+            </select>
+        </div>
+        <div class="timer-field"><label>Available In (text)</label><input type="text" id="timerAvailableText" placeholder="e.g. 3 days, 1 week"></div>
+        <div class="timer-field"><label>Available Date & Time</label><input type="datetime-local" id="timerAvailableDate"></div>
+        <button class="timer-save-btn" onclick="saveTimerUpdate()"><i class="fas fa-save"></i> Save & Move to Top</button>
+    </div>
+</div>
+
+<!-- Video Modal -->
+<div id="videoModal" class="video-modal">
+    <div class="video-content">
+        <div class="video-close" onclick="closeVideoModal()"><i class="fas fa-times"></i></div>
+        <div class="video-wrapper" id="videoWrapper"></div>
+        <div class="video-input-group">
+            <input type="text" id="videoUrlInput" placeholder="Enter YouTube/Video URL...">
+            <button onclick="updateVideo()">Load</button>
+        </div>
+    </div>
+</div>
+
+<!-- Screenshot Preview -->
+<div id="screenshotPreview" class="screenshot-preview" onclick="this.classList.remove('active')">
+    <img src="" alt="Screenshot" class="screenshot-image" id="screenshotImage">
+</div>
+
+<!-- Image Lightbox -->
+<div id="imgLightbox" class="img-lightbox">
+    <button class="lb-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+    <div class="lb-main-wrap">
+        <button class="lb-arrow" onclick="lbPrev()"><i class="fas fa-chevron-left"></i></button>
+        <div class="lb-main-img-box"><img id="lbMainImg" src="" alt="Property"><div class="lb-counter" id="lbCounter">1 / 6</div></div>
+        <button class="lb-arrow" onclick="lbNext()"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="lb-thumbs" id="lbThumbs"></div>
+    <div class="lb-actions">
+        <button class="lb-btn dl-img" onclick="lbDownloadCurrent()"><i class="fas fa-image"></i> Download Image</button>
+        <button class="lb-btn dl-pdf" onclick="lbDownloadPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+    </div>
+</div>
+
+<!-- Map Modal -->
+<div id="mapModal" class="map-modal">
+    <div class="map-modal-content">
+        <div class="map-modal-header">
+            <h3><i class="fas fa-map-marker-alt"></i> <span id="mapModalTitle">Location</span></h3>
+            <button class="map-modal-close" onclick="closeMapModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="map-iframe-wrap"><iframe id="mapIframe" src="" allowfullscreen loading="lazy"></iframe></div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="share-modal" id="shareModal" onclick="if(event.target===this)closeShareModal()">
+    <div class="share-sheet">
+        <div class="share-handle"></div>
+        <h3><i class="fas fa-share-alt" style="color:#c9a227;margin-right:6px"></i> Share Property</h3>
+        <div class="share-prop-name" id="sharePropName">Property</div>
+        <div class="share-pdf-row">
+            <div class="share-pdf-info">
+                <div class="share-pdf-icon"><i class="fas fa-file-pdf"></i></div>
+                <div><div class="share-pdf-text">Property Images PDF</div><div class="share-pdf-sub" id="sharePdfStatus">All images in one PDF</div></div>
+            </div>
+            <button class="share-pdf-btn" id="sharePdfBtn" onclick="shareDownloadPDF()"><i class="fas fa-download"></i> Download</button>
+        </div>
+        <hr class="share-divider">
+        <div class="share-grid" id="shareGrid"></div>
+        <button class="share-close-btn" onclick="closeShareModal()">Cancel</button>
+    </div>
+</div>
+
+<!-- Login Page -->
+<div class="login-page" id="loginPage">
+    <div class="login-container">
+        <div class="header-brand">
+            <img src="image-removebg-preview.png" alt="UAE Properties Logo" class="header-logo" onerror="this.style.display='none'">
+            <h1>UAE Properties</h1>
+            <p class="subtitle">Admin Dashboard</p>
+        </div>
+        <div style="text-align:center;margin-bottom:18px"><span class="role-badge admin"><i class="fas fa-shield-alt"></i> Admin Access</span></div>
+        <div class="login-form">
+            <div class="form-group"><label style="color: #000;">Username</label><input type="text" id="username" placeholder="Admin username" autocomplete="off"></div>
+            <div class="form-group"><label style="color: #000;">Password</label><input type="password" id="password" placeholder="Admin password" autocomplete="off"></div>
+            <button class="login-btn" onclick="handleLogin()">Login as Admin</button>
+        </div>
+        <div style="text-align:center;margin-top:16px;font-size:13px;color:#666">Other dashboards: <a href="user.html" style="color:var(--primary)">User</a> · <a href="marketing.html" style="color:#10b981">Marketing</a></div>
+    </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard">
+    <nav class="navbar">
+        <div class="logo-box">
+            <img src="image-removebg-preview.png" alt="" class="logo-img" onerror="this.style.display='none'">
+            <div class="logo-text">UAE Properties<span>Admin Panel</span></div>
+        </div>
+        <div class="nav-center"></div>
+        <div class="nav-right">
+            <div class="nav-links">
+                <span class="nav-link active" onclick="showSection('properties',this)">Properties</span>
+                <button class="notif-bell-btn" id="notifBellBtn" onclick="toggleNotifBar()" title="Notifications" style="display:none">
+                    <i class="fas fa-bell" id="notifBellIcon"></i>
+                    <span class="notif-count" id="notifCount" style="display:none">0</span>
+                </button>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">A</div>
+                    <div class="user-details">
+                        <div class="user-name" id="displayName">Admin</div>
+                        <div class="user-type">Administrator</div>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sub Navbar: Search + Notifications always visible -->
+    <div class="sub-navbar" id="subNavbar">
+        <div class="sub-search-wrap" id="navSearchWrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="navSearchInput" placeholder="Search by title, area, code, type...">
+            <button class="search-clear" onclick="clearSearch()"><i class="fas fa-times"></i></button>
+            <div class="search-dropdown" id="searchDropdown"></div>
+        </div>
+        <div class="sub-notif-strip">
+            <span class="sub-notif-label"><i class="fas fa-bell"></i> Notifications <span class="sub-notif-count" id="subNotifCount"></span></span>
+            <div class="sub-notif-items" id="subNotifItems"><span class="sub-notif-empty"><i class="fas fa-bell-slash"></i> No notifications</span></div>
+        </div>
+        <div class="sub-notif-actions">
+            <button class="sub-notif-mark-all" onclick="markAllRead()">Mark all read</button>
+        </div>
+    </div>
+
+    <!-- Notification Bar (kept for compatibility, hidden via CSS) -->
+    <div class="notif-bar" id="notifBar"><div class="notif-bar-inner"><div class="notif-bar-list" id="notifBarList"></div></div></div>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="filters-sidebar">
+            <div class="filters-header">
+                <h3><i class="fas fa-filter"></i> Filters</h3>
+                <span class="clear-filters" onclick="clearAllFilters()"><i class="fas fa-times"></i> Clear All</span>
+            </div>
+            <div class="filter-section">
+                <h4><i class="fas fa-city"></i> City</h4>
+                <select class="filter-select" id="filterCity" onchange="loadAreas()">
+                    <option value="">All Cities</option>
+                    <option value="Dubai">Dubai</option><option value="Abu Dhabi">Abu Dhabi</option>
+                    <option value="Sharjah">Sharjah</option><option value="Ajman">Ajman</option>
+                    <option value="Ras Al Khaimah">Ras Al Khaimah</option><option value="Fujairah">Fujairah</option>
+                    <option value="Umm Al Quwain">Umm Al Quwain</option>
+                </select>
+            </div>
+            <div class="filter-section">
+                <h4><i class="fas fa-map-marker-alt"></i> Area</h4>
+                <select class="filter-select" id="filterArea" onchange="loadSubAreas()"><option value="">All Areas</option></select>
+                <div class="add-area-input">
+                    <input type="text" id="newAreaInput" placeholder="Add new area..." style="flex:1;padding:0.7rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem">
+                    <button onclick="addNewArea()" style="padding:0.7rem 1rem;background:var(--primary);border:none;border-radius:10px;color:#000;font-weight:600;cursor:pointer"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="area-list" id="areaList"></div>
+            </div>
+            <div class="filter-section">
+                <h4><i class="fas fa-map-pin"></i> Sub Area</h4>
+                <select class="filter-select" id="filterSubArea"><option value="">All Sub Areas</option></select>
+                <div class="add-area-input">
+                    <input type="text" id="newSubAreaInput" placeholder="Add sub area..." style="flex:1;padding:0.7rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem">
+                    <button onclick="addNewSubArea()" style="padding:0.7rem 1rem;background:var(--primary);border:none;border-radius:10px;color:#000;font-weight:600;cursor:pointer"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="area-list" id="subAreaList"></div>
+            </div>
+            <div class="filter-section">
+                <h4><i class="fas fa-building"></i> Property Type</h4>
+                <div class="filter-options" id="propertyTypeFilters"></div>
+            </div>
+            <div class="filter-section">
+                <h4><i class="fas fa-money-bill"></i> Price Range (AED)</h4>
+                <div class="price-range">
+                    <input type="number" id="minPrice" placeholder="Min">
+                    <input type="number" id="maxPrice" placeholder="Max">
+                </div>
+            </div>
+            <div class="filter-section">
+                <h4><i class="fas fa-home"></i> Property Status</h4>
+                <div class="radio-group">
+                    <label class="radio-label"><input type="radio" name="propertyStatus" value="" checked> Any</label>
+                    <label class="radio-label"><input type="radio" name="propertyStatus" value="rent"> For Rent</label>
+                    <label class="radio-label"><input type="radio" name="propertyStatus" value="sale"> For Sale</label>
+                    <label class="radio-label"><input type="radio" name="propertyStatus" value="under-construction"> Under Construction</label>
+                    <label class="radio-label"><input type="radio" name="propertyStatus" value="sold-out"> Sold Out</label>
+                </div>
+            </div>
+            <div class="filter-section">
+                <h4><i class="fas fa-clock"></i> Rental Duration</h4>
+                <div class="radio-group">
+                    <label class="radio-label"><input type="radio" name="rentalDuration" value="" checked> Any</label>
+                    <label class="radio-label"><input type="radio" name="rentalDuration" value="hourly"> Per Hour</label>
+                    <label class="radio-label"><input type="radio" name="rentalDuration" value="daily"> Per Day</label>
+                    <label class="radio-label"><input type="radio" name="rentalDuration" value="monthly"> Monthly</label>
+                    <label class="radio-label"><input type="radio" name="rentalDuration" value="yearly"> Yearly</label>
+                </div>
+            </div>
+            <div class="filter-section">
+                <h4><i class="fas fa-check-circle"></i> Amenities</h4>
+                <div class="filter-options">
+                    <label class="filter-checkbox"><input type="checkbox" value="balcony"> Balcony</label>
+                    <label class="filter-checkbox"><input type="checkbox" value="attachedWashroom"> Attached Washroom</label>
+                    <label class="filter-checkbox"><input type="checkbox" value="window"> Window</label>
+                    <label class="filter-checkbox"><input type="checkbox" value="commonWashroom"> Common Washroom</label>
+                    <label class="filter-checkbox"><input type="checkbox" value="fullClosed"> Full Closed</label>
+                </div>
+            </div>
+            <button class="apply-filters-btn" onclick="applyFilters()"><i class="fas fa-search"></i> Apply Filters</button>
+        </div>
+
+        <!-- Content -->
+        <div class="content-area">
+            <div id="propertiesSection">
+                <div class="properties-header">
+                    <h2><i class="fas fa-building"></i> All Properties <span id="propCount" style="font-size:14px;color:var(--text-muted);margin-left:8px"></span></h2>
+                </div>
+                <div class="properties-grid" id="propertiesGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="shared.js"></script>
+<script src="card.js"></script>
+<script>
+// ===== CREDENTIALS =====
+const CREDENTIALS = {username:'UaeAdmin#1', password:'Adm!n@Secure99'};
+let currentUser = null;
+
+// ===== LOGIN =====
+function handleLogin(){
+    const u=document.getElementById('username').value.trim();
+    const p=document.getElementById('password').value.trim();
+    if(!u||!p){alert('Please enter credentials.');return;}
+    if(u===CREDENTIALS.username&&p===CREDENTIALS.password){
+        currentUser={username:'admin',type:'admin'};
+        sessionStorage.setItem('currentUser_admin',JSON.stringify(currentUser));
+        showDashboard();
+    }else{alert('Invalid admin credentials.');}
+}
+function logout(){
+    currentUser=null;sessionStorage.removeItem('currentUser_admin');
+    document.getElementById('loginPage').style.display='flex';
+    document.getElementById('dashboard').classList.remove('active');
+}
+function showDashboard(){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('dashboard').classList.add('active');
+    document.getElementById('displayName').textContent='Admin';
+    document.getElementById('userAvatar').textContent='A';
+    const bellBtn=document.getElementById('notifBellBtn');if(bellBtn)bellBtn.style.display='none';
+    populateFilters();initNavbarSearch();applyFilters();
+    setTimeout(checkAvailabilityNotifications,2000);
+    showToast('Welcome, Admin!');
+}
+
+// ===== FILTERS =====
+function populateFilters(){
+    document.getElementById('propertyTypeFilters').innerHTML=propertyTypes.map(t=>`<label class="filter-checkbox"><input type="checkbox" value="${t}"> ${t}</label>`).join('');
+}
+function loadAreas(){
+    const city=document.getElementById('filterCity').value;
+    const sel=document.getElementById('filterArea');const list=document.getElementById('areaList');
+    sel.innerHTML='<option value="">All Areas</option>';
+    if(!city){if(list)list.innerHTML='<p style="color:var(--text-muted);padding:8px;">Select a city first</p>';return;}
+    const areas=customAreas[city]||[];
+    areas.forEach(a=>{sel.innerHTML+=`<option value="${a}">${a}</option>`});
+    if(list)list.innerHTML=areas.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem;border-bottom:1px solid var(--border);color:var(--text-secondary);font-size:12px"><span>${a}</span><button onclick="removeArea('${a}')" style="background:var(--danger);color:#fff;border:none;border-radius:4px;width:22px;height:22px;cursor:pointer"><i class="fas fa-times"></i></button></div>`).join('');
+    loadSubAreas();
+}
+function loadSubAreas(){
+    const area=document.getElementById('filterArea').value;
+    const sel=document.getElementById('filterSubArea');const list=document.getElementById('subAreaList');
+    sel.innerHTML='<option value="">All Sub Areas</option>';
+    if(!area){if(list)list.innerHTML='<p style="color:var(--text-muted);padding:8px;">Select an area first</p>';return;}
+    const sub=customSubAreas[area]||[];
+    sub.forEach(s=>{sel.innerHTML+=`<option value="${s}">${s}</option>`});
+    if(list)list.innerHTML=sub.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem;border-bottom:1px solid var(--border);color:var(--text-secondary);font-size:12px"><span>${s}</span><button onclick="removeSubArea('${s}')" style="background:var(--danger);color:#fff;border:none;border-radius:4px;width:22px;height:22px;cursor:pointer"><i class="fas fa-times"></i></button></div>`).join('');
+}
+function addNewArea(){
+    const city=document.getElementById('filterCity').value;const newArea=document.getElementById('newAreaInput').value.trim();
+    if(!city||!newArea)return alert('Select city and enter area name');
+    if(!customAreas[city])customAreas[city]=[];if(customAreas[city].includes(newArea))return alert('Area already exists');
+    customAreas[city].push(newArea);localStorage.setItem('customAreas',JSON.stringify(customAreas));
+    document.getElementById('newAreaInput').value='';loadAreas();showToast('Area added: '+newArea);
+}
+function removeArea(area){
+    const city=document.getElementById('filterCity').value;if(confirm(`Remove "${area}"?`)){
+        customAreas[city]=customAreas[city].filter(a=>a!==area);localStorage.setItem('customAreas',JSON.stringify(customAreas));loadAreas();showToast('Area removed');}
+}
+function addNewSubArea(){
+    const area=document.getElementById('filterArea').value;const newSub=document.getElementById('newSubAreaInput').value.trim();
+    if(!area||!newSub)return alert('Select area and enter sub area name');
+    if(!customSubAreas[area])customSubAreas[area]=[];if(customSubAreas[area].includes(newSub))return alert('Sub area already exists');
+    customSubAreas[area].push(newSub);localStorage.setItem('customSubAreas',JSON.stringify(customSubAreas));
+    document.getElementById('newSubAreaInput').value='';loadSubAreas();showToast('Sub Area added: '+newSub);
+}
+function removeSubArea(sub){
+    const area=document.getElementById('filterArea').value;if(confirm(`Remove "${sub}"?`)){
+        customSubAreas[area]=customSubAreas[area].filter(s=>s!==sub);localStorage.setItem('customSubAreas',JSON.stringify(customSubAreas));loadSubAreas();showToast('Sub Area removed');}
+}
+
+function applyFilters(searchOverride){
+    let filtered=[...properties];
+    const city=document.getElementById('filterCity')?.value||'';
+    const area=document.getElementById('filterArea')?.value||'';
+    const subArea=document.getElementById('filterSubArea')?.value||'';
+    const minPrice=parseFloat(document.getElementById('minPrice')?.value||0);
+    const maxPrice=parseFloat(document.getElementById('maxPrice')?.value||0);
+    const propertyStatus=document.querySelector('input[name="propertyStatus"]:checked')?.value||'';
+    const rentalDuration=document.querySelector('input[name="rentalDuration"]:checked')?.value||'';
+    const searchTerm=searchOverride||document.getElementById('navSearchInput')?.value.toLowerCase()||'';
+    if(city)filtered=filtered.filter(p=>p.city===city);
+    if(area)filtered=filtered.filter(p=>p.area===area);
+    if(subArea)filtered=filtered.filter(p=>p.subArea===subArea);
+    if(minPrice)filtered=filtered.filter(p=>p.price>=minPrice);
+    if(maxPrice)filtered=filtered.filter(p=>p.price<=maxPrice);
+    if(propertyStatus)filtered=filtered.filter(p=>p.propertyStatus===propertyStatus);
+    if(rentalDuration)filtered=filtered.filter(p=>p.rentalType===rentalDuration);
+    const typeChecks=document.querySelectorAll('#propertyTypeFilters input:checked');
+    if(typeChecks.length>0){const sel=Array.from(typeChecks).map(c=>c.value);filtered=filtered.filter(p=>sel.includes(p.type));}
+    ['balcony','attachedWashroom','window','commonWashroom','fullClosed'].forEach(a=>{
+        const cb=document.querySelector(`.filter-options input[value="${a}"]`);
+        if(cb?.checked)filtered=filtered.filter(p=>p.amenities?.[a]==='yes');
+    });
+    if(searchTerm)filtered=filtered.filter(p=>(p.title||'').toLowerCase().includes(searchTerm)||(p.area||'').toLowerCase().includes(searchTerm)||(p.subArea||'').toLowerCase().includes(searchTerm)||(p.city||'').toLowerCase().includes(searchTerm)||(p.profileCode||'').toLowerCase().includes(searchTerm)||(p.type||'').toLowerCase().includes(searchTerm));
+    // Admin sees all (including pending)
+    const countEl=document.getElementById('propCount');if(countEl)countEl.textContent=`(${filtered.length})`;
+    displayProperties(filtered);
+}
+
+function clearAllFilters(){
+    document.getElementById('filterCity').value='';
+    document.getElementById('filterArea').innerHTML='<option value="">All Areas</option>';
+    document.getElementById('filterSubArea').innerHTML='<option value="">All Sub Areas</option>';
+    document.getElementById('areaList').innerHTML='';document.getElementById('subAreaList').innerHTML='';
+    document.querySelectorAll('#propertyTypeFilters input').forEach(c=>c.checked=false);
+    document.getElementById('minPrice').value='';document.getElementById('maxPrice').value='';
+    const ps=document.querySelector('input[name="propertyStatus"][value=""]');if(ps)ps.checked=true;
+    const rd=document.querySelector('input[name="rentalDuration"][value=""]');if(rd)rd.checked=true;
+    document.querySelectorAll('.filter-options input[type="checkbox"]').forEach(c=>c.checked=false);
+    const si=document.getElementById('navSearchInput');if(si)si.value='';
+    applyFilters();showToast('Filters cleared');
+}
+
+function showSection(section,el){
+    document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+    if(el)el.classList.add('active');
+    applyFilters();
+}
+
+// ===== ADMIN ACTIONS =====
+function approveProperty(id){
+    properties=properties.map(p=>p.id===id?{...p,status:'approved'}:p);
+    localStorage.setItem('properties',JSON.stringify(properties));applyFilters();showToast('Property approved!');
+}
+function changePropertyStatus(id){
+    const arr=['rent','sale','under-construction','sold-out'];const p=properties.find(p=>p.id===id);
+    const next=arr[(arr.indexOf(p.propertyStatus)+1)%4];const now=new Date().toISOString();
+    properties=properties.map(p=>p.id===id?{...p,propertyStatus:next,timerUpdatedAt:now,createdAt:now}:p);
+    localStorage.setItem('properties',JSON.stringify(properties));applyFilters();showToast('Status: '+next);
+}
+function deleteProperty(id){
+    if(!confirm('Delete this property?'))return;
+    properties=properties.filter(p=>p.id!==id);localStorage.setItem('properties',JSON.stringify(properties));applyFilters();showToast('Property deleted');
+}
+function openEditModal(id){
+    const p=properties.find(p=>p.id===id);if(!p)return;
+    document.getElementById('editFormContent').innerHTML=`
+        <form onsubmit="savePropertyEdit(${id});return false;">
+            <div class="edit-form-group"><label>Title</label><input type="text" id="editTitle" value="${(p.title||'').replace(/"/g,'&quot;')}" required></div>
+            <div class="edit-form-group"><label>Area</label><input type="text" id="editArea" value="${p.area||''}"></div>
+            <div class="edit-form-group"><label>Sub Area</label><input type="text" id="editSubArea" value="${p.subArea||''}"></div>
+            <div class="edit-form-group"><label>Price (AED)</label><input type="number" id="editPrice" value="${p.price}" required></div>
+            <div class="edit-form-group"><label>Size (Sq Ft)</label><input type="number" id="editSize" value="${p.areaSize}"></div>
+            <div class="edit-form-group"><label>Bedrooms</label><input type="number" id="editBedrooms" value="${p.bedrooms}"></div>
+            <div class="edit-form-group"><label>Bathrooms</label><input type="number" id="editBathrooms" value="${p.bathrooms}"></div>
+            <div class="edit-form-group"><label>Status</label><select id="editStatus"><option value="rent" ${p.propertyStatus==='rent'?'selected':''}>For Rent</option><option value="sale" ${p.propertyStatus==='sale'?'selected':''}>For Sale</option><option value="under-construction" ${p.propertyStatus==='under-construction'?'selected':''}>Under Construction</option><option value="sold-out" ${p.propertyStatus==='sold-out'?'selected':''}>Sold Out</option></select></div>
+            <div class="edit-form-group"><label>Video URL</label><input type="url" id="editVideoUrl" value="${p.videoUrl||''}" placeholder="https://youtube.com/..."></div>
+            <div class="edit-form-group"><label>Description</label><textarea id="editDescription" rows="3">${p.description||''}</textarea></div>
+            <div class="edit-form-group"><label>WhatsApp</label><input type="text" id="editWhatsapp" value="${p.contact?.whatsapp||''}"></div>
+            <div class="edit-form-group"><label>Phone</label><input type="text" id="editPhone" value="${p.contact?.phone||''}"></div>
+            <button type="submit" class="save-edit-btn">Save Changes</button>
+        </form>`;
+    document.getElementById('editModal').classList.add('active');
+}
+function savePropertyEdit(id){
+    const p=properties.find(p=>p.id===id);if(!p)return;
+    p.title=document.getElementById('editTitle').value;p.area=document.getElementById('editArea').value;
+    p.subArea=document.getElementById('editSubArea').value;p.price=parseFloat(document.getElementById('editPrice').value);
+    p.areaSize=parseFloat(document.getElementById('editSize').value);p.bedrooms=parseInt(document.getElementById('editBedrooms').value)||0;
+    p.bathrooms=parseInt(document.getElementById('editBathrooms').value)||1;p.propertyStatus=document.getElementById('editStatus').value;
+    p.videoUrl=document.getElementById('editVideoUrl').value;p.description=document.getElementById('editDescription').value;
+    p.contact={whatsapp:document.getElementById('editWhatsapp').value,phone:document.getElementById('editPhone').value};
+    p.timerUpdatedAt=new Date().toISOString();
+    localStorage.setItem('properties',JSON.stringify(properties));closeEditModal();applyFilters();showToast('Property updated!');
+}
+function closeEditModal(){document.getElementById('editModal').classList.remove('active');}
+function openTimerModal(id,e){
+    if(e)e.stopPropagation();const p=properties.find(p=>p.id===id);if(!p)return;
+    document.getElementById('timerPropertyId').value=id;document.getElementById('timerStatus').value=p.propertyStatus||'rent';
+    document.getElementById('timerAvailableText').value=p.availableIn||'';
+    if(p.availableFrom){const d=new Date(p.availableFrom);document.getElementById('timerAvailableDate').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);}
+    else document.getElementById('timerAvailableDate').value='';
+    document.getElementById('timerEditModal').classList.add('active');
+}
+function closeTimerModal(){document.getElementById('timerEditModal').classList.remove('active');}
+function saveTimerUpdate(){
+    const id=parseInt(document.getElementById('timerPropertyId').value);const nowISO=new Date().toISOString();
+    properties=properties.map(p=>{
+        if(p.id===id)return{...p,propertyStatus:document.getElementById('timerStatus').value,availableIn:document.getElementById('timerAvailableText').value,availableFrom:document.getElementById('timerAvailableDate').value?new Date(document.getElementById('timerAvailableDate').value).toISOString():'',timerUpdatedAt:nowISO,createdAt:nowISO};
+        return p;
+    });
+    localStorage.setItem('properties',JSON.stringify(properties));closeTimerModal();applyFilters();showToast('Timer updated!');
+}
+
+// ===== AUTO SESSION =====
+(function(){
+    const saved=sessionStorage.getItem('currentUser_admin');
+    if(saved){try{currentUser=JSON.parse(saved);showDashboard();}catch(e){sessionStorage.removeItem('currentUser_admin');}}
+})();
+</script>
+</body>
+</html>

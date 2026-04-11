@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UAE Properties – Marketing Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"></noscript>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="marketing.css">
+</head>
+<body>
+<div id="notificationToast" class="notification-toast"><i class="fas fa-bell"></i><span id="toastMessage">Done!</span><span onclick="hideToast()" style="cursor:pointer;margin-left:4px"><i class="fas fa-times"></i></span></div>
+<div id="videoModal" class="video-modal"><div class="video-content"><div class="video-close" onclick="closeVideoModal()"><i class="fas fa-times"></i></div><div class="video-wrapper" id="videoWrapper"></div><div class="video-input-group"><input type="text" id="videoUrlInput" placeholder="Enter YouTube/Video URL..."><button onclick="updateVideo()">Load</button></div></div></div>
+<div id="imgLightbox" class="img-lightbox"><button class="lb-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button><div class="lb-main-wrap"><button class="lb-arrow" onclick="lbPrev()"><i class="fas fa-chevron-left"></i></button><div class="lb-main-img-box"><img id="lbMainImg" src="" alt="Property"><div class="lb-counter" id="lbCounter">1 / 6</div></div><button class="lb-arrow" onclick="lbNext()"><i class="fas fa-chevron-right"></i></button></div><div class="lb-thumbs" id="lbThumbs"></div><div class="lb-actions"><button class="lb-btn dl-img" onclick="lbDownloadCurrent()"><i class="fas fa-image"></i> Download Image</button><button class="lb-btn dl-pdf" onclick="lbDownloadPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button></div></div>
+<div id="mapModal" class="map-modal"><div class="map-modal-content"><div class="map-modal-header"><h3><i class="fas fa-map-marker-alt"></i> <span id="mapModalTitle">Location</span></h3><button class="map-modal-close" onclick="closeMapModal()"><i class="fas fa-times"></i></button></div><div class="map-iframe-wrap"><iframe id="mapIframe" src="" allowfullscreen loading="lazy"></iframe></div></div></div>
+<div class="share-modal" id="shareModal" onclick="if(event.target===this)closeShareModal()"><div class="share-sheet"><div class="share-handle"></div><h3><i class="fas fa-share-alt" style="color:#c9a227;margin-right:6px"></i> Share Property</h3><div class="share-prop-name" id="sharePropName">Property</div><div class="share-pdf-row"><div class="share-pdf-info"><div class="share-pdf-icon"><i class="fas fa-file-pdf"></i></div><div><div class="share-pdf-text">Property Images PDF</div><div class="share-pdf-sub" id="sharePdfStatus">All images in one PDF</div></div></div><button class="share-pdf-btn" id="sharePdfBtn" onclick="shareDownloadPDF()"><i class="fas fa-download"></i> Download</button></div><hr class="share-divider"><div class="share-grid" id="shareGrid"></div><button class="share-close-btn" onclick="closeShareModal()">Cancel</button></div></div>
+
+<div class="login-page" id="loginPage">
+  <div class="login-container">
+    <div class="header-brand">
+      <img src="image-removebg-preview.png" alt="" class="header-logo" onerror="this.style.display='none'">
+      <h1>UAE Properties</h1><p class="subtitle">Marketing Dashboard</p>
+    </div>
+    <div style="text-align:center;margin-bottom:18px"><span class="role-badge marketing"><i class="fas fa-chart-bar"></i> Marketing Access</span></div>
+    <div class="login-form">
+      <div class="form-group"><label style="color: #000;">Username</label><input type="text" id="username" autocomplete="off"></div>
+      <div class="form-group"><label style="color: #000;">Password</label><input type="password" id="password" autocomplete="off"></div>
+      <button class="login-btn" onclick="handleLogin()">Login as User</button>
+    </div>
+    <div style="text-align:center;margin-top:16px;font-size:13px;color:#666">Other: <a href="admin.html" style="color:#ef4444">Admin</a> · <a href="marketing.html" style="color:#10b981">Marketing</a></div>
+  </div>
+</div>
+
+<div class="dashboard" id="dashboard">
+  <nav class="navbar">
+    <div class="logo-box"><img src="image-removebg-preview.png" alt="" class="logo-img" onerror="this.style.display='none'"><div class="logo-text">UAE Properties<span>Marketing Panel</span></div></div>
+    <div class="nav-center"></div>
+    <div class="nav-right"><div class="nav-links">
+      <span class="nav-link active" onclick="showSection('properties',this)">Properties</span>
+      <div class="user-info"><div class="user-avatar" id="userAvatar">U</div><div class="user-details"><div class="user-name" id="displayName">User</div><div class="user-type" style="color:var(--primary)">Marketing Team</div></div></div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div></div>
+  </nav>
+
+  <div class="sub-navbar" id="subNavbar">
+      <div class="sub-search-wrap" id="navSearchWrap">
+          <i class="fas fa-search"></i>
+          <input type="text" id="navSearchInput" placeholder="Search properties...">
+          <button class="search-clear" onclick="clearSearch()"><i class="fas fa-times"></i></button>
+          <div class="search-dropdown" id="searchDropdown"></div>
+      </div>
+      <div class="sub-notif-strip">
+          <span class="sub-notif-label"><i class="fas fa-bell"></i> Notifications <span class="sub-notif-count" id="subNotifCount"></span></span>
+          <div class="sub-notif-items" id="subNotifItems"><span class="sub-notif-empty"><i class="fas fa-bell-slash"></i> No notifications</span></div>
+      </div>
+      <div class="sub-notif-actions">
+          <button class="sub-notif-mark-all" onclick="markAllRead()">Mark all read</button>
+      </div>
+  </div>
+
+  <div class="notif-bar" id="notifBar"><div class="notif-bar-inner"><div class="notif-bar-list" id="notifBarList"></div></div></div>
+
+  <div class="main-container">
+    <div class="filters-sidebar">
+      <div class="filters-header"><h3><i class="fas fa-filter"></i> Filters</h3><span class="clear-filters" onclick="clearAllFilters()"><i class="fas fa-times"></i> Clear All</span></div>
+      <div class="filter-section"><h4><i class="fas fa-city"></i> City</h4><select class="filter-select" id="filterCity" onchange="loadAreas()"><option value="">All Cities</option><option value="Dubai">Dubai</option><option value="Abu Dhabi">Abu Dhabi</option><option value="Sharjah">Sharjah</option><option value="Ajman">Ajman</option><option value="Ras Al Khaimah">Ras Al Khaimah</option><option value="Fujairah">Fujairah</option><option value="Umm Al Quwain">Umm Al Quwain</option></select></div>
+      <div class="filter-section"><h4><i class="fas fa-map-marker-alt"></i> Area</h4><select class="filter-select" id="filterArea" onchange="loadSubAreas()"><option value="">All Areas</option></select>
+        <div class="add-area-input" style="margin-top:6px"><input type="text" id="newAreaInput" placeholder="Add new area..." style="flex:1;padding:0.7rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem"><button onclick="addNewArea()" style="padding:0.7rem 1rem;background:var(--primary);border:none;border-radius:10px;color:#000;font-weight:600;cursor:pointer"><i class="fas fa-plus"></i></button></div>
+        <div class="area-list" id="areaList"></div></div>
+      <div class="filter-section"><h4><i class="fas fa-map-pin"></i> Sub Area</h4><select class="filter-select" id="filterSubArea"><option value="">All Sub Areas</option></select>
+        <div class="add-area-input" style="margin-top:6px"><input type="text" id="newSubAreaInput" placeholder="Add sub area..." style="flex:1;padding:0.7rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem"><button onclick="addNewSubArea()" style="padding:0.7rem 1rem;background:var(--primary);border:none;border-radius:10px;color:#000;font-weight:600;cursor:pointer"><i class="fas fa-plus"></i></button></div>
+        <div class="area-list" id="subAreaList"></div></div>
+      <div class="filter-section"><h4><i class="fas fa-building"></i> Property Type</h4><div class="filter-options" id="propertyTypeFilters"></div></div>
+      <div class="filter-section"><h4><i class="fas fa-money-bill"></i> Price Range (AED)</h4><div class="price-range"><input type="number" id="minPrice" placeholder="Min"><input type="number" id="maxPrice" placeholder="Max"></div></div>
+      <div class="filter-section"><h4><i class="fas fa-home"></i> Property Status</h4><div class="radio-group"><label class="radio-label"><input type="radio" name="propertyStatus" value="" checked> Any</label><label class="radio-label"><input type="radio" name="propertyStatus" value="rent"> For Rent</label><label class="radio-label"><input type="radio" name="propertyStatus" value="sale"> For Sale</label><label class="radio-label"><input type="radio" name="propertyStatus" value="under-construction"> Under Construction</label><label class="radio-label"><input type="radio" name="propertyStatus" value="sold-out"> Sold Out</label></div></div>
+      <div class="filter-section"><h4><i class="fas fa-clock"></i> Rental Duration</h4><div class="radio-group"><label class="radio-label"><input type="radio" name="rentalDuration" value="" checked> Any</label><label class="radio-label"><input type="radio" name="rentalDuration" value="hourly"> Per Hour</label><label class="radio-label"><input type="radio" name="rentalDuration" value="daily"> Per Day</label><label class="radio-label"><input type="radio" name="rentalDuration" value="monthly"> Monthly</label><label class="radio-label"><input type="radio" name="rentalDuration" value="yearly"> Yearly</label></div></div>
+      <div class="filter-section"><h4><i class="fas fa-check-circle"></i> Amenities</h4><div class="filter-options"><label class="filter-checkbox"><input type="checkbox" value="balcony"> Balcony</label><label class="filter-checkbox"><input type="checkbox" value="attachedWashroom"> Attached Washroom</label><label class="filter-checkbox"><input type="checkbox" value="window"> Window</label><label class="filter-checkbox"><input type="checkbox" value="commonWashroom"> Common Washroom</label><label class="filter-checkbox"><input type="checkbox" value="fullClosed"> Full Closed</label></div></div>
+      <button class="apply-filters-btn" onclick="applyFilters()"><i class="fas fa-search"></i> Apply Filters</button>
+    </div>
+
+    <div class="content-area">
+      <div id="propertiesSection">
+        <div class="properties-header"><h2><i class="fas fa-building"></i> Available Properties</h2></div>
+        <div class="properties-grid" id="propertiesGrid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script src="card.js"></script>
+<script>
+const CREDENTIALS={username:'Marketing#1',password:'Mkt@UAE2024!'};
+let currentUser=null;
+
+function handleLogin(){
+    const u=document.getElementById('username').value.trim();const p=document.getElementById('password').value.trim();
+    if(!u||!p){alert('Please enter credentials.');return;}
+    if(u===CREDENTIALS.username&&p===CREDENTIALS.password){currentUser={username:'user',type:'user'};sessionStorage.setItem('currentUser_marketing',JSON.stringify(currentUser));showDashboard();}
+    else alert('Invalid user credentials.');
+}
+
+function logout(){currentUser=null;sessionStorage.removeItem('currentUser_marketing');document.getElementById('loginPage').style.display='flex';document.getElementById('dashboard').classList.remove('active');}
+
+function showDashboard(){
+    document.getElementById('loginPage').style.display='none';document.getElementById('dashboard').classList.add('active');
+    document.getElementById('displayName').textContent='User';document.getElementById('userAvatar').textContent='U';
+    const bellBtn=document.getElementById('notifBellBtn');if(bellBtn)bellBtn.style.display='flex';
+    populateFilters();initNavbarSearch();applyFilters();setTimeout(checkAvailabilityNotifications,2000);showToast('Welcome back!');
+}
+
+function populateFilters(){document.getElementById('propertyTypeFilters').innerHTML=propertyTypes.map(t=>`<label class="filter-checkbox"><input type="checkbox" value="${t}"> ${t}</label>`).join('');}
+
+function loadAreas(){
+    const city=document.getElementById('filterCity').value;const sel=document.getElementById('filterArea');const list=document.getElementById('areaList');
+    sel.innerHTML='<option value="">All Areas</option>';if(!city){if(list)list.innerHTML='<p style="color:var(--text-muted);padding:8px;">Select a city first</p>';return;}
+    const areas=customAreas[city]||[];areas.forEach(a=>{sel.innerHTML+=`<option value="${a}">${a}</option>`});
+    if(list)list.innerHTML=areas.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem;border-bottom:1px solid var(--border);color:var(--text-secondary);font-size:12px"><span>${a}</span><button onclick="removeArea('${a}')" style="background:var(--danger);color:#fff;border:none;border-radius:4px;width:22px;height:22px;cursor:pointer"><i class="fas fa-times"></i></button></div>`).join('');
+    loadSubAreas();
+}
+
+function loadSubAreas(){
+    const area=document.getElementById('filterArea').value;const sel=document.getElementById('filterSubArea');const list=document.getElementById('subAreaList');
+    sel.innerHTML='<option value="">All Sub Areas</option>';if(!area){if(list)list.innerHTML='<p style="color:var(--text-muted);padding:8px;">Select an area first</p>';return;}
+    const sub=customSubAreas[area]||[];sub.forEach(s=>{sel.innerHTML+=`<option value="${s}">${s}</option>`});
+    if(list)list.innerHTML=sub.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem;border-bottom:1px solid var(--border);color:var(--text-secondary);font-size:12px"><span>${s}</span><button onclick="removeSubArea('${s}')" style="background:var(--danger);color:#fff;border:none;border-radius:4px;width:22px;height:22px;cursor:pointer"><i class="fas fa-times"></i></button></div>`).join('');
+}
+
+function addNewArea(){
+    const city=document.getElementById('filterCity').value;const newArea=document.getElementById('newAreaInput').value.trim();
+    if(!city||!newArea)return alert('Select city and enter area name');
+    if(!customAreas[city])customAreas[city]=[];if(customAreas[city].includes(newArea))return alert('Area already exists');
+    customAreas[city].push(newArea);localStorage.setItem('customAreas',JSON.stringify(customAreas));
+    document.getElementById('newAreaInput').value='';loadAreas();showToast('Area added: '+newArea);
+}
+
+function removeArea(area){
+    const city=document.getElementById('filterCity').value;if(confirm(`Remove "${area}"?`)){
+        customAreas[city]=customAreas[city].filter(a=>a!==area);localStorage.setItem('customAreas',JSON.stringify(customAreas));loadAreas();showToast('Area removed');}
+}
+
+function addNewSubArea(){
+    const area=document.getElementById('filterArea').value;const newSub=document.getElementById('newSubAreaInput').value.trim();
+    if(!area||!newSub)return alert('Select area and enter sub area name');
+    if(!customSubAreas[area])customSubAreas[area]=[];if(customSubAreas[area].includes(newSub))return alert('Sub area already exists');
+    customSubAreas[area].push(newSub);localStorage.setItem('customSubAreas',JSON.stringify(customSubAreas));
+    document.getElementById('newSubAreaInput').value='';loadSubAreas();showToast('Sub Area added: '+newSub);
+}
+
+function removeSubArea(sub){
+    const area=document.getElementById('filterArea').value;if(confirm(`Remove "${sub}"?`)){
+        customSubAreas[area]=customSubAreas[area].filter(s=>s!==sub);localStorage.setItem('customSubAreas',JSON.stringify(customSubAreas));loadSubAreas();showToast('Sub Area removed');}
+}
+
+function applyFilters(searchOverride){
+    let filtered=[...properties].filter(p=>p.status==='approved');
+    const city=document.getElementById('filterCity')?.value||'';const area=document.getElementById('filterArea')?.value||'';const subArea=document.getElementById('filterSubArea')?.value||'';
+    const minPrice=parseFloat(document.getElementById('minPrice')?.value||0);const maxPrice=parseFloat(document.getElementById('maxPrice')?.value||0);
+    const propertyStatus=document.querySelector('input[name="propertyStatus"]:checked')?.value||'';const rentalDuration=document.querySelector('input[name="rentalDuration"]:checked')?.value||'';
+    const searchTerm=searchOverride||document.getElementById('navSearchInput')?.value.toLowerCase()||'';
+    if(city)filtered=filtered.filter(p=>p.city===city);if(area)filtered=filtered.filter(p=>p.area===area);if(subArea)filtered=filtered.filter(p=>p.subArea===subArea);
+    if(minPrice)filtered=filtered.filter(p=>p.price>=minPrice);if(maxPrice)filtered=filtered.filter(p=>p.price<=maxPrice);
+    if(propertyStatus)filtered=filtered.filter(p=>p.propertyStatus===propertyStatus);if(rentalDuration)filtered=filtered.filter(p=>p.rentalType===rentalDuration);
+    const typeChecks=document.querySelectorAll('#propertyTypeFilters input:checked');if(typeChecks.length>0){const sel=Array.from(typeChecks).map(c=>c.value);filtered=filtered.filter(p=>sel.includes(p.type));}
+    ['balcony','attachedWashroom','window','commonWashroom','fullClosed'].forEach(a=>{const cb=document.querySelector(`.filter-options input[value="${a}"]`);if(cb?.checked)filtered=filtered.filter(p=>p.amenities?.[a]==='yes');});
+    if(searchTerm)filtered=filtered.filter(p=>(p.title||'').toLowerCase().includes(searchTerm)||(p.area||'').toLowerCase().includes(searchTerm)||(p.subArea||'').toLowerCase().includes(searchTerm)||(p.city||'').toLowerCase().includes(searchTerm)||(p.profileCode||'').toLowerCase().includes(searchTerm)||(p.type||'').toLowerCase().includes(searchTerm));
+    displayProperties(filtered);
+}
+
+function clearAllFilters(){
+    ['filterCity','filterArea','filterSubArea','minPrice','maxPrice'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'?'':''});
+    document.getElementById('filterArea').innerHTML='<option value="">All Areas</option>';document.getElementById('filterSubArea').innerHTML='<option value="">All Sub Areas</option>';
+    document.querySelectorAll('#propertyTypeFilters input').forEach(c=>c.checked=false);
+    const ps=document.querySelector('input[name="propertyStatus"][value=""]');if(ps)ps.checked=true;const rd=document.querySelector('input[name="rentalDuration"][value=""]');if(rd)rd.checked=true;
+    document.querySelectorAll('.filter-options input[type="checkbox"]').forEach(c=>c.checked=false);
+    const si=document.getElementById('navSearchInput');if(si)si.value='';applyFilters();showToast('Filters cleared');
+}
+
+function showSection(section,el){
+    document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));if(el)el.classList.add('active');
+    document.getElementById('propertiesSection').style.display=section==='properties'?'block':'none';
+    if(section==='properties')applyFilters();
+}
+
+(function(){const saved=sessionStorage.getItem('currentUser_marketing');if(saved){try{currentUser=JSON.parse(saved);showDashboard();}catch(e){sessionStorage.removeItem('currentUser_marketing');}}})();
+</script>
+</body>
+</html>
