@@ -14,6 +14,19 @@
 </head>
 <body>
 
+<!-- Change Credentials Modal (Admin) -->
+<div id="changeCredsModal" class="edit-modal" onclick="if(event.target===this)closeChangeCredentials()">
+    <div class="edit-modal-content" style="max-width:440px">
+        <div class="edit-modal-close" onclick="closeChangeCredentials()"><i class="fas fa-times"></i></div>
+        <h2 style="color:var(--primary);margin-bottom:6px;font-size:18px"><i class="fas fa-shield-alt"></i> Change Admin Credentials</h2>
+        <p style="color:#888;font-size:12px;margin-bottom:20px">Update your admin username and password. You will use the new credentials on next login.</p>
+        <div class="edit-form-group"><label>New Username</label><input type="text" id="newUsername" placeholder="Enter new username" autocomplete="off"></div>
+        <div class="edit-form-group"><label>New Password</label><input type="password" id="newPassword" placeholder="Minimum 8 characters" autocomplete="new-password"></div>
+        <div class="edit-form-group"><label>Confirm Password</label><input type="password" id="confirmPassword" placeholder="Repeat new password" autocomplete="new-password"></div>
+        <button class="save-edit-btn" onclick="saveNewCredentials()"><i class="fas fa-save"></i> Save New Credentials</button>
+    </div>
+</div>
+
 <!-- Toast -->
 <div id="notificationToast" class="notification-toast">
     <i class="fas fa-bell"></i>
@@ -34,17 +47,10 @@
 <div id="timerEditModal" class="timer-edit-modal">
     <div class="timer-edit-content">
         <button class="timer-close-btn" onclick="closeTimerModal()"><i class="fas fa-times"></i></button>
-        <h2><i class="fas fa-clock"></i> Update Timer & Status</h2>
+        <h2><i class="fas fa-calendar-alt"></i> Update Date & Available</h2>
         <input type="hidden" id="timerPropertyId">
-        <div class="timer-field"><label>Property Status</label>
-            <select id="timerStatus">
-                <option value="rent">For Rent</option><option value="sale">For Sale</option>
-                <option value="under-construction">Under Construction</option><option value="sold-out">Sold Out</option>
-            </select>
-        </div>
-        <div class="timer-field"><label>Available In (text)</label><input type="text" id="timerAvailableText" placeholder="e.g. 3 days, 1 week"></div>
-        <div class="timer-field"><label>Available Date & Time</label><input type="datetime-local" id="timerAvailableDate"></div>
-        <button class="timer-save-btn" onclick="saveTimerUpdate()"><i class="fas fa-save"></i> Save & Move to Top</button>
+        <div class="timer-field"><label><i class="fas fa-calendar-alt"></i> Available From Date & Time</label><input type="datetime-local" id="timerAvailableDate"></div>
+        <button class="timer-save-btn" onclick="saveTimerUpdate()"><i class="fas fa-save"></i> Save & Update Cards</button>
     </div>
 </div>
 
@@ -150,6 +156,7 @@
                         <div class="user-type">Administrator</div>
                     </div>
                 </div>
+                <button class="logout-btn" style="border-color:var(--primary);color:var(--primary);margin-right:4px" onclick="openChangeCredentials()" title="Change Username & Password"><i class="fas fa-key"></i></button>
                 <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
@@ -165,7 +172,7 @@
         </div>
         <div class="sub-notif-strip">
             <span class="sub-notif-label"><i class="fas fa-bell"></i> Notifications <span class="sub-notif-count" id="subNotifCount"></span></span>
-            <div class="sub-notif-items" id="subNotifItems"><span class="sub-notif-empty"><i class="fas fa-bell-slash"></i> No notifications</span></div>
+            <div class="sub-notif-items" id="subNotifItems" style="display:flex;gap:8px;overflow-x:auto;flex:1;padding:2px 0;scrollbar-width:thin;scrollbar-color:rgba(201,162,39,0.3) transparent"><span class="sub-notif-empty"><i class="fas fa-bell-slash"></i> No notifications</span></div>
         </div>
         <div class="sub-notif-actions">
             <button class="sub-notif-mark-all" onclick="markAllRead()">Mark all read</button>
@@ -269,25 +276,82 @@
 <script src="shared.js"></script>
 <script src="card.js"></script>
 <script>
-// ===== CREDENTIALS =====
-const CREDENTIALS = {username:'UaeAdmin#1', password:'Adm!n@Secure99'};
+// ===== SECURE CREDENTIALS (SHA-256 hashed, stored in localStorage) =====
+const ROLE_KEY = 'adminCredentials_v2';
+
+async function sha256(str){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function getStoredCreds(){
+    const raw = localStorage.getItem(ROLE_KEY);
+    if(raw){ try{ return JSON.parse(raw); } catch(e){} }
+    // Default credentials (pre-hashed placeholder; will be set on first use)
+    return null;
+}
+
+async function initDefaultCreds(){
+    if(!localStorage.getItem(ROLE_KEY)){
+        const uhash = await sha256('UaeAdmin#1');
+        const phash = await sha256('Adm!n@Secure99');
+        localStorage.setItem(ROLE_KEY, JSON.stringify({usernameHash: uhash, passwordHash: phash}));
+    }
+}
+
 let currentUser = null;
 
 // ===== LOGIN =====
-function handleLogin(){
-    const u=document.getElementById('username').value.trim();
-    const p=document.getElementById('password').value.trim();
-    if(!u||!p){alert('Please enter credentials.');return;}
-    if(u===CREDENTIALS.username&&p===CREDENTIALS.password){
-        currentUser={username:'admin',type:'admin'};
-        sessionStorage.setItem('currentUser_admin',JSON.stringify(currentUser));
+async function handleLogin(){
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value.trim();
+    if(!u||!p){ alert('Please enter your username and password.'); return; }
+    const creds = getStoredCreds();
+    if(!creds){ alert('Credentials not initialized. Please refresh.'); return; }
+    const uhash = await sha256(u);
+    const phash = await sha256(p);
+    if(uhash === creds.usernameHash && phash === creds.passwordHash){
+        currentUser = {username:'admin', type:'admin'};
+        sessionStorage.setItem('currentUser_admin', JSON.stringify(currentUser));
         showDashboard();
-    }else{alert('Invalid admin credentials.');}
+    } else {
+        alert('Invalid admin credentials. Access denied.');
+    }
 }
+
 function logout(){
-    currentUser=null;sessionStorage.removeItem('currentUser_admin');
-    document.getElementById('loginPage').style.display='flex';
+    currentUser = null;
+    sessionStorage.removeItem('currentUser_admin');
+    document.getElementById('loginPage').style.display = 'flex';
     document.getElementById('dashboard').classList.remove('active');
+}
+
+// ===== CHANGE CREDENTIALS =====
+function openChangeCredentials(){
+    const modal = document.getElementById('changeCredsModal');
+    if(modal) modal.classList.add('active');
+}
+function closeChangeCredentials(){
+    const modal = document.getElementById('changeCredsModal');
+    if(modal){
+        modal.classList.remove('active');
+        ['newUsername','newPassword','confirmPassword'].forEach(id=>{
+            const el = document.getElementById(id); if(el) el.value='';
+        });
+    }
+}
+async function saveNewCredentials(){
+    const newU = document.getElementById('newUsername').value.trim();
+    const newP = document.getElementById('newPassword').value;
+    const confP = document.getElementById('confirmPassword').value;
+    if(!newU || !newP){ alert('Username and password are required.'); return; }
+    if(newP !== confP){ alert('Passwords do not match.'); return; }
+    if(newP.length < 8){ alert('Password must be at least 8 characters.'); return; }
+    const uhash = await sha256(newU);
+    const phash = await sha256(newP);
+    localStorage.setItem(ROLE_KEY, JSON.stringify({usernameHash: uhash, passwordHash: phash}));
+    closeChangeCredentials();
+    showToast('Admin credentials updated successfully!');
 }
 function showDashboard(){
     document.getElementById('loginPage').style.display='none';
@@ -369,7 +433,7 @@ function applyFilters(searchOverride){
         const cb=document.querySelector(`.filter-options input[value="${a}"]`);
         if(cb?.checked)filtered=filtered.filter(p=>p.amenities?.[a]==='yes');
     });
-    if(searchTerm)filtered=filtered.filter(p=>(p.title||'').toLowerCase().includes(searchTerm)||(p.area||'').toLowerCase().includes(searchTerm)||(p.subArea||'').toLowerCase().includes(searchTerm)||(p.city||'').toLowerCase().includes(searchTerm)||(p.profileCode||'').toLowerCase().includes(searchTerm)||(p.type||'').toLowerCase().includes(searchTerm));
+    if(searchTerm)filtered=filtered.filter(p=>(p.title||'').toLowerCase().includes(searchTerm)||(p.area||'').toLowerCase().includes(searchTerm)||(p.subArea||'').toLowerCase().includes(searchTerm)||(p.city||'').toLowerCase().includes(searchTerm)||(p.profileCode||'').toLowerCase().includes(searchTerm)||(p.type||'').toLowerCase().includes(searchTerm)||(p.createdAt?new Date(p.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).toLowerCase():'').includes(searchTerm)||(p.availableFrom?new Date(p.availableFrom).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).toLowerCase():'').includes(searchTerm));
     // Admin sees all (including pending)
     const countEl=document.getElementById('propCount');if(countEl)countEl.textContent=`(${filtered.length})`;
     displayProperties(filtered);
@@ -444,8 +508,7 @@ function savePropertyEdit(id){
 function closeEditModal(){document.getElementById('editModal').classList.remove('active');}
 function openTimerModal(id,e){
     if(e)e.stopPropagation();const p=properties.find(p=>p.id===id);if(!p)return;
-    document.getElementById('timerPropertyId').value=id;document.getElementById('timerStatus').value=p.propertyStatus||'rent';
-    document.getElementById('timerAvailableText').value=p.availableIn||'';
+    document.getElementById('timerPropertyId').value=id;
     if(p.availableFrom){const d=new Date(p.availableFrom);document.getElementById('timerAvailableDate').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);}
     else document.getElementById('timerAvailableDate').value='';
     document.getElementById('timerEditModal').classList.add('active');
@@ -453,15 +516,17 @@ function openTimerModal(id,e){
 function closeTimerModal(){document.getElementById('timerEditModal').classList.remove('active');}
 function saveTimerUpdate(){
     const id=parseInt(document.getElementById('timerPropertyId').value);const nowISO=new Date().toISOString();
+    const dateVal=document.getElementById('timerAvailableDate').value;
     properties=properties.map(p=>{
-        if(p.id===id)return{...p,propertyStatus:document.getElementById('timerStatus').value,availableIn:document.getElementById('timerAvailableText').value,availableFrom:document.getElementById('timerAvailableDate').value?new Date(document.getElementById('timerAvailableDate').value).toISOString():'',timerUpdatedAt:nowISO,createdAt:nowISO};
+        if(p.id===id)return{...p,availableFrom:dateVal?new Date(dateVal).toISOString():'',availableIn:dateVal?new Date(dateVal).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'',timerUpdatedAt:nowISO,createdAt:nowISO};
         return p;
     });
-    localStorage.setItem('properties',JSON.stringify(properties));closeTimerModal();applyFilters();showToast('Timer updated!');
+    localStorage.setItem('properties',JSON.stringify(properties));closeTimerModal();applyFilters();showToast('Date & Available updated!');
 }
 
 // ===== AUTO SESSION =====
-(function(){
+(async function(){
+    await initDefaultCreds();
     const saved=sessionStorage.getItem('currentUser_admin');
     if(saved){try{currentUser=JSON.parse(saved);showDashboard();}catch(e){sessionStorage.removeItem('currentUser_admin');}}
 })();

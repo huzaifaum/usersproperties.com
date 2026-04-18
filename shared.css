@@ -87,7 +87,7 @@ body{background-color:var(--bg-primary);color:var(--text-primary);overflow-x:hid
 .notif-bell-btn .notif-count{position:absolute;top:0px;right:2px;background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #0b1423;line-height:1}
 
 /* ===== SUB-NAVBAR STRIP (Search + Notifications always visible below navbar) ===== */
-.sub-navbar{position:fixed;top:80px;left:0;right:0;z-index:950;background:linear-gradient(135deg,#0f1c30 0%,#1a2a45 100%);border-bottom:2px solid rgba(201,162,39,0.35);box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;gap:12px;padding:8px 24px}
+.sub-navbar{position:fixed;top:80px;left:0;right:0;z-index:950;background:linear-gradient(135deg,#0f1c30 0%,#1a2a45 100%);border-bottom:2px solid rgba(201,162,39,0.35);box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;gap:12px;padding:6px 24px;min-height:62px}
 .sub-navbar .sub-search-wrap{flex:1;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.07);border:2px solid rgba(201,162,39,0.28);border-radius:30px;padding:7px 16px;transition:all 0.3s;position:relative;max-width:500px}
 .sub-navbar .sub-search-wrap:focus-within{border-color:var(--primary);background:rgba(255,255,255,0.11);box-shadow:0 0 0 3px rgba(201,162,39,0.13)}
 .sub-navbar .sub-search-wrap i.fa-search{color:var(--primary);font-size:13px;flex-shrink:0}
@@ -97,7 +97,7 @@ body{background-color:var(--bg-primary);color:var(--text-primary);overflow-x:hid
 .sub-navbar .sub-search-wrap:focus-within .search-clear{display:block}
 .sub-navbar .sub-search-wrap .search-dropdown{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#1a2a45;border:2px solid rgba(201,162,39,0.3);border-radius:14px;z-index:9999;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
 /* Notification strip section */
-.sub-notif-strip{flex:1;display:flex;align-items:center;gap:10px;overflow:hidden}
+.sub-notif-strip{flex:1;display:flex;align-items:center;gap:10px;overflow:hidden;min-height:50px}
 .sub-notif-label{color:var(--primary);font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0}
 .sub-notif-label i{font-size:13px}
 .sub-notif-items{display:flex;gap:8px;overflow-x:auto;flex:1;scrollbar-width:none}
@@ -107,6 +107,17 @@ body{background-color:var(--bg-primary);color:var(--text-primary);overflow-x:hid
 .sub-notif-chip.unread{border-color:var(--primary);color:#fff;background:rgba(201,162,39,0.18)}
 .sub-notif-chip i{font-size:11px;color:var(--primary)}
 .sub-notif-empty{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:5px}
+/* Notification Cards */
+.sub-notif-card{display:flex;align-items:center;gap:8px;background:rgba(201,162,39,0.08);border:1.5px solid rgba(201,162,39,0.2);border-radius:12px;padding:6px 10px;cursor:pointer;transition:all 0.2s;flex-shrink:0;min-width:200px;max-width:240px}
+.sub-notif-card:hover{background:rgba(201,162,39,0.18);border-color:var(--primary);transform:translateY(-1px)}
+.sub-notif-card.unread{border-color:var(--primary);background:rgba(201,162,39,0.14)}
+.sub-notif-card.unread::before{content:'';display:block;width:6px;height:6px;border-radius:50%;background:var(--primary);flex-shrink:0;align-self:flex-start;margin-top:4px}
+.sub-notif-thumb{width:44px;height:36px;border-radius:7px;object-fit:cover;flex-shrink:0}
+.sub-notif-card-body{flex:1;min-width:0}
+.sub-notif-card-title{font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-notif-card-sub{font-size:10px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-notif-card-date{font-size:10px;color:#10b981;margin-top:1px;white-space:nowrap}
+.sub-notif-card-price{font-size:10px;font-weight:700;color:var(--primary);white-space:nowrap;flex-shrink:0;align-self:flex-start}
 .sub-notif-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .sub-notif-mark-all{background:none;border:1.5px solid rgba(201,162,39,0.35);color:var(--primary);border-radius:20px;padding:3px 12px;font-size:10px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'Poppins',sans-serif;white-space:nowrap}
 .sub-notif-mark-all:hover{background:rgba(201,162,39,0.12)}
@@ -436,4 +447,449 @@ body{background-color:var(--bg-primary);color:var(--text-primary);overflow-x:hid
 }
 @media(max-width:480px){
     .main-container{margin-top:140px}
+}
+/* Add these styles to your shared.css file */
+
+/* ===== NEAREST PLACES SECTION ===== */
+.nearest-places-section {
+    margin: 12px 0;
+    padding: 10px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+    border-radius: 12px;
+    border-left: 4px solid var(--primary);
+}
+
+.nearest-places-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.nearest-places-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.nearest-place-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.nearest-place-chip:hover {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.nearest-place-chip i {
+    font-size: 11px;
+    color: var(--primary);
+}
+
+.nearest-place-chip:hover i {
+    color: #000;
+}
+
+.nearest-place-chip small {
+    font-size: 9px;
+    color: #888;
+    margin-left: 2px;
+}
+
+.nearest-place-chip:hover small {
+    color: #333;
+}
+
+/* ===== PROPERTY FEATURES (Replaced generic view) ===== */
+.property-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    margin: 10px 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+    background: #f5f5f5;
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+.feature-item i {
+    color: var(--primary);
+    font-size: 13px;
+}
+
+/* ===== AVAILABLE DATE STYLES ===== */
+.available-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.available-date.available-now {
+    color: #10b981 !important;
+    animation: pulse-green 1.5s infinite;
+}
+
+.available-date.available-today {
+    color: #f59e0b !important;
+    animation: pulse-orange 1.5s infinite;
+}
+
+@keyframes pulse-green {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes pulse-orange {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ===== NOTIFICATION CARDS ===== */
+.sub-notif-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid rgba(201,162,39,0.2);
+    max-width: 320px;
+}
+
+.sub-notif-card:hover {
+    background: rgba(201,162,39,0.15);
+    transform: translateX(4px);
+}
+
+.sub-notif-card.unread {
+    background: rgba(201,162,39,0.12);
+    border-left: 3px solid var(--primary);
+}
+
+.notif-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+}
+
+.notif-card-icon.avail {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.notif-card-icon.update {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+.notif-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notif-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notif-card-message {
+    font-size: 11px;
+    color: #ddd;
+    margin-bottom: 4px;
+}
+
+.notif-card-location {
+    font-size: 10px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.notif-card-price {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: 4px;
+}
+
+.notif-card-time {
+    font-size: 10px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ===== NEAREST PLACES UPLOAD FORM STYLES ===== */
+#nearestPlacesSection {
+    grid-column: span 2;
+    background: rgba(201,162,39,0.05);
+    border: 2px solid var(--primary);
+    border-radius: 16px;
+    padding: 16px;
+    margin: 10px 0;
+}
+
+@media (max-width: 600px) {
+    #nearestPlacesSection {
+        grid-column: span 1;
+    }
+}
+
+#nearestPlacesSection h3 {
+    color: var(--primary);
+    font-size: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nearest-place-item {
+    background: #0d1829;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+}
+
+.np-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.np-header i {
+    color: var(--primary);
+    font-size: 14px;
+}
+
+.np-header strong {
+    color: #fff;
+    font-size: 13px;
+}
+
+.np-category {
+    background: rgba(201,162,39,0.2);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    color: var(--primary);
+}
+
+.np-remove {
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+
+.np-remove:hover {
+    transform: scale(1.1);
+}
+
+.np-map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #4285f4;
+    text-decoration: none;
+    margin-top: 6px;
+}
+
+.np-map-link:hover {
+    text-decoration: underline;
+}
+
+.np-empty {
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 16px;
+    text-align: center;
+}
+
+.add-nearest-place-form {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.add-nearest-place-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 600px) {
+    .add-nearest-place-form .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.add-nearest-place-form input,
+.add-nearest-place-form select {
+    width: 100%;
+    padding: 8px 12px;
+    background: #fff;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    color: #333;
+    font-size: 13px;
+}
+
+.btn-add-place {
+    width: 100%;
+    padding: 10px;
+    background: var(--primary);
+    border: none;
+    border-radius: 10px;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-add-place:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+/* ===== SHARE BUTTON ===== */
+.share-btn {
+    background: linear-gradient(135deg, #c9a227, #b48a1a);
+    color: #000;
+}
+
+.share-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(201,162,39,0.3);
+}
+
+/* ===== BELL SHAKE ANIMATION ===== */
+@keyframes bellShake {
+    0%, 100% { transform: rotate(0); }
+    20% { transform: rotate(-15deg); }
+    40% { transform: rotate(15deg); }
+    60% { transform: rotate(-10deg); }
+    80% { transform: rotate(10deg); }
+}
+
+.bell-shake {
+    animation: bellShake 0.6s ease;
+}
+
+/* ===== SEARCH DROPDOWN IMPROVEMENTS ===== */
+.search-dropdown {
+    max-height: 400px;
+    overflow-y: auto;
+    background: #1a2a45;
+    border: 2px solid rgba(201,162,39,0.3);
+    border-radius: 14px;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background: rgba(201,162,39,0.15);
+}
+
+.sri-thumb {
+    width: 50px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #2a3b57;
+}
+
+.sri-info {
+    flex: 1;
+}
+
+.sri-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sri-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.sri-price {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    flex-shrink: 0;
 }

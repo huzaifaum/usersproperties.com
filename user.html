@@ -1,3 +1,4 @@
+<!-- user.html (fixed - removed Urdu, improved property card loading) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,13 +7,13 @@
 <title>UAE Properties – User Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"></noscript>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <link rel="stylesheet" href="shared.css">
 <link rel="stylesheet" href="user.css">
 </head>
 <body>
+
 <div id="notificationToast" class="notification-toast"><i class="fas fa-bell"></i><span id="toastMessage">Done!</span><span onclick="hideToast()" style="cursor:pointer;margin-left:4px"><i class="fas fa-times"></i></span></div>
 <div id="videoModal" class="video-modal"><div class="video-content"><div class="video-close" onclick="closeVideoModal()"><i class="fas fa-times"></i></div><div class="video-wrapper" id="videoWrapper"></div><div class="video-input-group"><input type="text" id="videoUrlInput" placeholder="Enter YouTube/Video URL..."><button onclick="updateVideo()">Load</button></div></div></div>
 <div id="imgLightbox" class="img-lightbox"><button class="lb-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button><div class="lb-main-wrap"><button class="lb-arrow" onclick="lbPrev()"><i class="fas fa-chevron-left"></i></button><div class="lb-main-img-box"><img id="lbMainImg" src="" alt="Property"><div class="lb-counter" id="lbCounter">1 / 6</div></div><button class="lb-arrow" onclick="lbNext()"><i class="fas fa-chevron-right"></i></button></div><div class="lb-thumbs" id="lbThumbs"></div><div class="lb-actions"><button class="lb-btn dl-img" onclick="lbDownloadCurrent()"><i class="fas fa-image"></i> Download Image</button><button class="lb-btn dl-pdf" onclick="lbDownloadPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button></div></div>
@@ -49,7 +50,7 @@
     </div></div>
   </nav>
 
-  <!-- Sub Navbar: Search + Notifications always visible -->
+  <!-- Sub Navbar -->
   <div class="sub-navbar" id="subNavbar">
       <div class="sub-search-wrap" id="navSearchWrap">
           <i class="fas fa-search"></i>
@@ -66,11 +67,10 @@
       </div>
   </div>
 
-  <!-- Notification Bar (kept for compatibility, hidden via CSS) -->
   <div class="notif-bar" id="notifBar"><div class="notif-bar-inner"><div class="notif-bar-list" id="notifBarList"></div></div></div>
 
   <div class="main-container">
-    <!-- Sidebar (same as admin but no admin-specific) -->
+    <!-- Sidebar -->
     <div class="filters-sidebar">
       <div class="filters-header"><h3><i class="fas fa-filter"></i> Filters</h3><span class="clear-filters" onclick="clearAllFilters()"><i class="fas fa-times"></i> Clear All</span></div>
       <div class="filter-section"><h4><i class="fas fa-city"></i> City</h4><select class="filter-select" id="filterCity" onchange="loadAreas()"><option value="">All Cities</option><option value="Dubai">Dubai</option><option value="Abu Dhabi">Abu Dhabi</option><option value="Sharjah">Sharjah</option><option value="Ajman">Ajman</option><option value="Ras Al Khaimah">Ras Al Khaimah</option><option value="Fujairah">Fujairah</option><option value="Umm Al Quwain">Umm Al Quwain</option></select></div>
@@ -102,7 +102,49 @@
             <div class="form-group full-width"><label>Property Title *</label><input type="text" id="propertyTitle" placeholder="e.g., Skyline Residencies"></div>
             <div class="form-group"><label>City *</label><select id="propertyCity" onchange="loadAreasForUpload()"><option value="">Select City</option><option value="Dubai">Dubai</option><option value="Abu Dhabi">Abu Dhabi</option><option value="Sharjah">Sharjah</option><option value="Ajman">Ajman</option><option value="Ras Al Khaimah">Ras Al Khaimah</option><option value="Fujairah">Fujairah</option><option value="Umm Al Quwain">Umm Al Quwain</option></select></div>
             <div class="form-group"><label>Area *</label><select id="propertyArea" onchange="loadSubAreasForUpload()"></select><div class="add-area-input" style="margin-top:6px"><input type="text" id="uploadNewAreaInput" placeholder="Add new area..." style="flex:1;padding:0.6rem 0.8rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem"><button type="button" onclick="addAreaFromUpload()" style="padding:0.6rem 0.9rem;background:var(--primary);border:none;border-radius:10px;color:#000;font-weight:700;cursor:pointer"><i class="fas fa-plus"></i></button></div></div>
-            <div class="form-group"><label>Sub Area</label><select id="propertySubArea" style="margin-bottom:6px"><option value="">Select Sub Area</option></select><div class="add-area-input" style="margin-top:6px"><input type="text" id="uploadNewSubAreaInput" placeholder="Add sub area..." style="flex:1;padding:0.6rem 0.8rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem"><button type="button" onclick="addSubAreaFromUpload()" style="padding:0.6rem 0.9rem;background:var(--primary);border:none;border-radius:10px;color:#000;font-weight:700;cursor:pointer"><i class="fas fa-plus"></i></button></div><div class="add-area-input" style="margin-top:4px"><input type="url" id="uploadSubAreaMapLink" placeholder="Google Maps link for sub area (optional)" style="flex:1;padding:0.6rem 0.8rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem"></div></div>
+            <div class="form-group">
+              <label>Sub Area</label>
+              <select id="propertySubArea" style="margin-bottom:6px" onchange="loadNearestPointsForUpload()"><option value="">Select Sub Area</option></select>
+              <div class="add-area-input" style="margin-top:6px">
+                <input type="text" id="uploadNewSubAreaInput" placeholder="Add sub area..." style="flex:1;padding:0.6rem 0.8rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem">
+                <button type="button" onclick="addSubAreaFromUpload()" style="padding:0.6rem 0.9rem;background:var(--primary);border:none;border-radius:10px;color:#000;font-weight:700;cursor:pointer"><i class="fas fa-plus"></i></button>
+              </div>
+              <div class="add-area-input" style="margin-top:4px">
+                <input type="url" id="uploadSubAreaMapLink" placeholder="Google Maps link for sub area (optional)" style="flex:1;padding:0.6rem 0.8rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem">
+              </div>
+            </div>
+
+            <!-- Nearby Places Section -->
+            <div class="form-group" id="nearestPointSection" style="display:block;border:2px solid var(--primary);border-radius:14px;padding:14px;background:rgba(201,162,39,0.06)">
+              <label style="color:var(--primary);font-weight:700;font-size:0.95rem"><i class="fas fa-map-marker-alt"></i> Nearby Places</label>
+              <p style="font-size:11px;color:#888;margin:4px 0 10px">Select or add nearby places like malls, metro stations, schools, etc.</p>
+
+              <select id="nearestPointSelect" style="margin-bottom:8px;width:100%;padding:0.6rem 0.8rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem" onchange="onNearestPointSelect()">
+                <option value="">-- Select Nearby Place --</option>
+              </select>
+
+              <div id="nearestPointMapDisplay" style="display:none;margin-bottom:8px">
+                <button type="button" onclick="openNearestPointMap()" style="width:100%;padding:0.6rem;background:linear-gradient(135deg,#4285f4,#34a853);border:none;border-radius:10px;color:#fff;font-weight:600;cursor:pointer;font-size:0.85rem">
+                  <i class="fas fa-map-marker-alt"></i> View on Google Map
+                </button>
+              </div>
+
+              <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:10px">
+                <p style="font-size:11px;color:#888;margin:0 0 6px"><i class="fas fa-plus-circle" style="color:var(--primary)"></i> Add New Nearby Place:</p>
+                <div class="add-area-input" style="margin-bottom:6px">
+                  <input type="text" id="newNearestPointName" placeholder="Place name (e.g., Dubai Mall, Metro Station)" style="flex:1;padding:0.6rem 0.8rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem">
+                </div>
+                <div class="add-area-input" style="margin-bottom:6px">
+                  <input type="url" id="newNearestPointMapLink" placeholder="Google Maps link (https://maps.google.com/...)" style="flex:1;padding:0.6rem 0.8rem;background:#fff;border:2px solid var(--border);border-radius:10px;color:#333;font-size:0.85rem">
+                </div>
+                <button type="button" onclick="addNearestPoint()" style="width:100%;padding:0.6rem;background:var(--primary);border:none;border-radius:10px;color:#000;font-weight:700;cursor:pointer;font-size:0.85rem">
+                  <i class="fas fa-plus"></i> Add Nearby Place
+                </button>
+              </div>
+
+              <div id="nearestPointsList" style="margin-top:8px;max-height:160px;overflow-y:auto"></div>
+            </div>
+
             <div class="form-group"><label>Property Type *</label><select id="propertyType"><optgroup label="Residential"><option value="Studio Apartment">Studio Apartment</option><option value="Bed Space">Bed Space</option><option value="Partition">Partition</option><option value="Room">Room</option><option value="Hall">Hall</option></optgroup><optgroup label="Apartments (BHK)"><option value="1 BHK">1 BHK</option><option value="2 BHK">2 BHK</option><option value="3 BHK">3 BHK</option><option value="4 BHK">4 BHK</option><option value="5 BHK">5 BHK</option><option value="6 BHK">6 BHK</option><option value="7 BHK">7 BHK</option><option value="8 BHK">8 BHK</option><option value="9 BHK">9 BHK</option><option value="10 BHK">10 BHK</option></optgroup><optgroup label="Villas"><option value="Villa">Villa</option><option value="1 BHK Villa">1 BHK Villa</option><option value="2 BHK Villa">2 BHK Villa</option><option value="3 BHK Villa">3 BHK Villa</option><option value="4 BHK Villa">4 BHK Villa</option><option value="5 BHK Villa">5 BHK Villa</option></optgroup><optgroup label="Commercial"><option value="Warehouse">Warehouse</option><option value="Shop">Shop</option><option value="Office - Building">Office - Building</option><option value="Office - Street">Office - Street</option></optgroup></select></div>
             <div class="form-group"><label>Price (AED) *</label><input type="number" id="propertyPrice" placeholder="e.g., 280000" inputmode="numeric"></div>
             <div class="form-group"><label>Rental/Sale Type</label><select id="propertyRentalType"><option value="hourly">Per Hour</option><option value="daily">Per Day</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option><option value="sale">For Sale</option></select></div>
@@ -129,7 +171,7 @@
               <div class="form-group"><label>Attached Washroom</label><select id="attachedWashroom"><option value="yes">Yes</option><option value="no" selected>No</option></select></div>
               <div class="form-group"><label>Window</label><select id="window"><option value="yes">Yes</option><option value="no" selected>No</option></select></div>
               <div class="form-group"><label>Common Washroom</label><select id="commonWashroom"><option value="yes">Yes</option><option value="no" selected>No</option></select></div>
-              <div class="form-group"><label>separate Washroom</label><select id="separate Washroom"><option value="yes">Yes</option><option value="no" selected>No</option></select></div>  
+              <div class="form-group"><label>Separate Washroom</label><select id="separateWashroom"><option value="yes">Yes</option><option value="no" selected>No</option></select></div>  
               <div class="form-group"><label>Full Closed</label><select id="fullClosed"><option value="yes">Yes</option><option value="no" selected>No</option></select></div>
               <div class="form-group"><label>Gender Preference</label><select id="genderPreference"><option value="male">Only Males</option><option value="female">Only Females</option></select></div>
               <div class="form-group"><label>Kids Allowed</label><select id="kidsAllowed"><option value="yes">Yes</option><option value="no" selected>No</option></select></div>
@@ -166,15 +208,44 @@
 <script src="shared.js"></script>
 <script src="card.js"></script>
 <script>
-const CREDENTIALS={username:'UaeAgent#7',password:'Prop@User2024!'};
-let currentUser=null;
-function handleLogin(){
-    const u=document.getElementById('username').value.trim();const p=document.getElementById('password').value.trim();
-    if(!u||!p){alert('Please enter credentials.');return;}
-    if(u===CREDENTIALS.username&&p===CREDENTIALS.password){currentUser={username:'user',type:'user'};sessionStorage.setItem('currentUser_user',JSON.stringify(currentUser));showDashboard();}
-    else alert('Invalid user credentials.');
+// ===== SECURE CREDENTIALS (SHA-256 hashed) =====
+const ROLE_KEY = 'userCredentials_v2';
+
+async function sha256(str){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
+
+function getStoredCreds(){
+    const raw = localStorage.getItem(ROLE_KEY);
+    if(raw){ try{ return JSON.parse(raw); } catch(e){} }
+    return null;
+}
+
+async function initDefaultCreds(){
+    if(!localStorage.getItem(ROLE_KEY)){
+        const uhash = await sha256('UaeAgent#7');
+        const phash = await sha256('Prop@User2024!');
+        localStorage.setItem(ROLE_KEY, JSON.stringify({usernameHash: uhash, passwordHash: phash}));
+    }
+}
+
+let currentUser=null;
+
+async function handleLogin(){
+    const u=document.getElementById('username').value.trim();const p=document.getElementById('password').value.trim();
+    if(!u||!p){alert('Please enter your username and password.');return;}
+    const creds=getStoredCreds();
+    if(!creds){alert('Credentials not initialized. Please refresh.');return;}
+    const uhash=await sha256(u);const phash=await sha256(p);
+    if(uhash===creds.usernameHash&&phash===creds.passwordHash){
+        currentUser={username:'user',type:'user'};
+        sessionStorage.setItem('currentUser_user',JSON.stringify(currentUser));showDashboard();
+    } else alert('Invalid credentials. Access denied.');
+}
+
 function logout(){currentUser=null;sessionStorage.removeItem('currentUser_user');document.getElementById('loginPage').style.display='flex';document.getElementById('dashboard').classList.remove('active');}
+
 function showDashboard(){
     document.getElementById('loginPage').style.display='none';document.getElementById('dashboard').classList.add('active');
     document.getElementById('displayName').textContent='User';document.getElementById('userAvatar').textContent='U';
@@ -182,7 +253,9 @@ function showDashboard(){
     document.getElementById('profileCode').value=Math.floor(560+Math.random()*100);
     populateFilters();initNavbarSearch();applyFilters();setTimeout(checkAvailabilityNotifications,2000);showToast('Welcome back!');
 }
+
 function populateFilters(){document.getElementById('propertyTypeFilters').innerHTML=propertyTypes.map(t=>`<label class="filter-checkbox"><input type="checkbox" value="${t}"> ${t}</label>`).join('');}
+
 function loadAreas(){
     const city=document.getElementById('filterCity').value;const sel=document.getElementById('filterArea');const list=document.getElementById('areaList');
     sel.innerHTML='<option value="">All Areas</option>';if(!city){if(list)list.innerHTML='<p style="color:var(--text-muted);padding:8px;">Select a city first</p>';return;}
@@ -190,12 +263,14 @@ function loadAreas(){
     if(list)list.innerHTML=areas.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem;border-bottom:1px solid var(--border);color:var(--text-secondary);font-size:12px"><span>${a}</span><button onclick="removeArea('${a}')" style="background:var(--danger);color:#fff;border:none;border-radius:4px;width:22px;height:22px;cursor:pointer"><i class="fas fa-times"></i></button></div>`).join('');
     loadSubAreas();
 }
+
 function loadSubAreas(){
     const area=document.getElementById('filterArea').value;const sel=document.getElementById('filterSubArea');const list=document.getElementById('subAreaList');
     sel.innerHTML='<option value="">All Sub Areas</option>';if(!area){if(list)list.innerHTML='<p style="color:var(--text-muted);padding:8px;">Select an area first</p>';return;}
     const sub=customSubAreas[area]||[];sub.forEach(s=>{sel.innerHTML+=`<option value="${s}">${s}</option>`});
     if(list)list.innerHTML=sub.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem;border-bottom:1px solid var(--border);color:var(--text-secondary);font-size:12px"><span>${s}</span><button onclick="removeSubArea('${s}')" style="background:var(--danger);color:#fff;border:none;border-radius:4px;width:22px;height:22px;cursor:pointer"><i class="fas fa-times"></i></button></div>`).join('');
 }
+
 function addNewArea(){
     const city=document.getElementById('filterCity').value;const newArea=document.getElementById('newAreaInput').value.trim();
     if(!city||!newArea)return alert('Select city and enter area name');
@@ -203,10 +278,12 @@ function addNewArea(){
     customAreas[city].push(newArea);localStorage.setItem('customAreas',JSON.stringify(customAreas));
     document.getElementById('newAreaInput').value='';loadAreas();showToast('Area added: '+newArea);
 }
+
 function removeArea(area){
     const city=document.getElementById('filterCity').value;if(confirm(`Remove "${area}"?`)){
         customAreas[city]=customAreas[city].filter(a=>a!==area);localStorage.setItem('customAreas',JSON.stringify(customAreas));loadAreas();showToast('Area removed');}
 }
+
 function addNewSubArea(){
     const area=document.getElementById('filterArea').value;const newSub=document.getElementById('newSubAreaInput').value.trim();
     if(!area||!newSub)return alert('Select area and enter sub area name');
@@ -214,10 +291,12 @@ function addNewSubArea(){
     customSubAreas[area].push(newSub);localStorage.setItem('customSubAreas',JSON.stringify(customSubAreas));
     document.getElementById('newSubAreaInput').value='';loadSubAreas();showToast('Sub Area added: '+newSub);
 }
+
 function removeSubArea(sub){
     const area=document.getElementById('filterArea').value;if(confirm(`Remove "${sub}"?`)){
         customSubAreas[area]=customSubAreas[area].filter(s=>s!==sub);localStorage.setItem('customSubAreas',JSON.stringify(customSubAreas));loadSubAreas();showToast('Sub Area removed');}
 }
+
 function applyFilters(searchOverride){
     let filtered=[...properties].filter(p=>p.status==='approved');
     const city=document.getElementById('filterCity')?.value||'';const area=document.getElementById('filterArea')?.value||'';const subArea=document.getElementById('filterSubArea')?.value||'';
@@ -229,9 +308,10 @@ function applyFilters(searchOverride){
     if(propertyStatus)filtered=filtered.filter(p=>p.propertyStatus===propertyStatus);if(rentalDuration)filtered=filtered.filter(p=>p.rentalType===rentalDuration);
     const typeChecks=document.querySelectorAll('#propertyTypeFilters input:checked');if(typeChecks.length>0){const sel=Array.from(typeChecks).map(c=>c.value);filtered=filtered.filter(p=>sel.includes(p.type));}
     ['balcony','attachedWashroom','window','commonWashroom','fullClosed'].forEach(a=>{const cb=document.querySelector(`.filter-options input[value="${a}"]`);if(cb?.checked)filtered=filtered.filter(p=>p.amenities?.[a]==='yes');});
-    if(searchTerm)filtered=filtered.filter(p=>(p.title||'').toLowerCase().includes(searchTerm)||(p.area||'').toLowerCase().includes(searchTerm)||(p.subArea||'').toLowerCase().includes(searchTerm)||(p.city||'').toLowerCase().includes(searchTerm)||(p.profileCode||'').toLowerCase().includes(searchTerm)||(p.type||'').toLowerCase().includes(searchTerm));
+    if(searchTerm)filtered=filtered.filter(p=>(p.title||'').toLowerCase().includes(searchTerm)||(p.area||'').toLowerCase().includes(searchTerm)||(p.subArea||'').toLowerCase().includes(searchTerm)||(p.city||'').toLowerCase().includes(searchTerm)||(p.profileCode||'').toLowerCase().includes(searchTerm)||(p.type||'').toLowerCase().includes(searchTerm)||(p.createdAt?new Date(p.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).toLowerCase():'').includes(searchTerm)||(p.availableFrom?new Date(p.availableFrom).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).toLowerCase():'').includes(searchTerm));
     displayProperties(filtered);
 }
+
 function clearAllFilters(){
     ['filterCity','filterArea','filterSubArea','minPrice','maxPrice'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'?'':''});
     document.getElementById('filterArea').innerHTML='<option value="">All Areas</option>';document.getElementById('filterSubArea').innerHTML='<option value="">All Sub Areas</option>';
@@ -240,17 +320,24 @@ function clearAllFilters(){
     document.querySelectorAll('.filter-options input[type="checkbox"]').forEach(c=>c.checked=false);
     const si=document.getElementById('navSearchInput');if(si)si.value='';applyFilters();showToast('Filters cleared');
 }
+
 function showSection(section,el){
     document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));if(el)el.classList.add('active');
     document.getElementById('propertiesSection').style.display=section==='properties'?'block':'none';
     document.getElementById('uploadSection').style.display=section==='upload'?'block':'none';
     if(section==='properties')applyFilters();else{loadAreasForUpload();}
 }
+
 function uploadProperty(){
     if(!currentUser||currentUser.type!=='user'){alert('Please login as Property User.');return;}
     const imageUrls=getUploadedImages();const labels=getImageLabels();const finalVideoUrl=getFinalVideoUrl();
     const subAreaSel=document.getElementById('propertySubArea')?.value||'';
-    const newProperty={id:Date.now(),profileCode:document.getElementById('profileCode')?.value||Math.floor(560+Math.random()*100),title:document.getElementById('propertyTitle').value,city:document.getElementById('propertyCity').value,area:document.getElementById('propertyArea').value,subArea:subAreaSel,type:document.getElementById('propertyType').value,price:parseFloat(document.getElementById('propertyPrice').value),propertyStatus:'rent',rentalType:document.getElementById('propertyRentalType').value,bedrooms:parseInt(document.getElementById('propertyBedrooms').value)||0,bathrooms:parseInt(document.getElementById('propertyBathrooms').value)||1,areaSize:parseFloat(document.getElementById('propertyAreaSize').value)||0,description:document.getElementById('propertyDescription').value,amenities:{balcony:document.getElementById('balcony').value,attachedWashroom:document.getElementById('attachedWashroom').value,window:document.getElementById('window').value,commonWashroom:document.getElementById('commonWashroom').value,fullClosed:document.getElementById('fullClosed').value,genderPreference:document.getElementById('genderPreference').value,kidsAllowed:document.getElementById('kidsAllowed').value,bachelorsAllowed:document.getElementById('bachelorsAllowed').value},imageLabels:labels,images:imageUrls,contact:{whatsapp:document.getElementById('whatsappNumber').value||'',phone:document.getElementById('phoneNumber').value||''},locationLink:document.getElementById('locationLink')?.value||'',videoUrl:finalVideoUrl,availableIn:'',availableFrom:'',status:'pending',userId:currentUser.username,createdAt:new Date().toISOString(),timerUpdatedAt:new Date().toISOString()};
+    const npSel=document.getElementById('nearestPointSelect');
+    const selectedNP=npSel?npSel.value:'';
+    const subKey=subAreaSel||'__general__';
+    const npData=customNearestPoints[subKey]||[];
+    const npObj=npData.find(n=>n.name===selectedNP)||null;
+    const newProperty={id:Date.now(),profileCode:document.getElementById('profileCode')?.value||Math.floor(560+Math.random()*100),title:document.getElementById('propertyTitle').value,city:document.getElementById('propertyCity').value,area:document.getElementById('propertyArea').value,subArea:subAreaSel,nearestPoint:npObj?{name:npObj.name,mapLink:npObj.mapLink}:null,type:document.getElementById('propertyType').value,price:parseFloat(document.getElementById('propertyPrice').value),propertyStatus:'rent',rentalType:document.getElementById('propertyRentalType').value,bedrooms:parseInt(document.getElementById('propertyBedrooms').value)||0,bathrooms:parseInt(document.getElementById('propertyBathrooms').value)||1,areaSize:parseFloat(document.getElementById('propertyAreaSize').value)||0,description:document.getElementById('propertyDescription').value,amenities:{balcony:document.getElementById('balcony').value,attachedWashroom:document.getElementById('attachedWashroom').value,window:document.getElementById('window').value,commonWashroom:document.getElementById('commonWashroom').value,separateWashroom:document.getElementById('separateWashroom').value,fullClosed:document.getElementById('fullClosed').value,genderPreference:document.getElementById('genderPreference').value,kidsAllowed:document.getElementById('kidsAllowed').value,bachelorsAllowed:document.getElementById('bachelorsAllowed').value},imageLabels:labels,images:imageUrls,contact:{whatsapp:document.getElementById('whatsappNumber').value||'',phone:document.getElementById('phoneNumber').value||''},locationLink:document.getElementById('locationLink')?.value||'',videoUrl:finalVideoUrl,availableIn:'',availableFrom:'',status:'pending',userId:currentUser.username,createdAt:new Date().toISOString(),timerUpdatedAt:new Date().toISOString()};
     if(!newProperty.title||!newProperty.city||!newProperty.area||!newProperty.type||!newProperty.price){alert('Please fill all required fields');return;}
     properties.push(newProperty);localStorage.setItem('properties',JSON.stringify(properties));
     _uploadedVideoDataUrl=null;['videoFileInput','videoUrlPreview','videoFilePreview'].forEach(id=>{const el=document.getElementById(id);if(el){if(el.tagName==='INPUT')el.value='';else{el.classList.remove('show');el.innerHTML='';}}});
@@ -258,7 +345,90 @@ function uploadProperty(){
     const vurl=document.getElementById('propertyVideoUrl');if(vurl)vurl.value='';
     showToast('Property uploaded! Waiting for admin approval.');showSection('properties',document.querySelector('.nav-link'));
 }
-(function(){const saved=sessionStorage.getItem('currentUser_user');if(saved){try{currentUser=JSON.parse(saved);showDashboard();}catch(e){sessionStorage.removeItem('currentUser_user');}}})();
+
+// Nearby Points Functions
+function loadNearestPointsForUpload(){
+    const subArea=document.getElementById('propertySubArea')?.value||'';
+    const section=document.getElementById('nearestPointSection');
+    const sel=document.getElementById('nearestPointSelect');
+    const display=document.getElementById('nearestPointMapDisplay');
+    const list=document.getElementById('nearestPointsList');
+    if(!section)return;
+    section.style.display='block';
+    if(display)display.style.display='none';
+    const key=subArea||'__general__';
+    const points=customNearestPoints[key]||[];
+    if(sel){
+        sel.innerHTML='<option value="">-- Select Nearby Place --</option>'+points.map(p=>`<option value="${p.name}">${p.name}${p.mapLink?' \uD83D\uDCCD':''}</option>`).join('');
+    }
+    renderNearestPointsList(key,list,points);
+}
+
+function onNearestPointSelect(){
+    const subArea=document.getElementById('propertySubArea')?.value||'';
+    const selVal=document.getElementById('nearestPointSelect')?.value||'';
+    const display=document.getElementById('nearestPointMapDisplay');
+    if(!display)return;
+    if(!selVal){display.style.display='none';return;}
+    const key=subArea||'__general__';
+    const points=customNearestPoints[key]||[];
+    const found=points.find(p=>p.name===selVal);
+    display.style.display=(found&&found.mapLink)?'block':'none';
+}
+
+function openNearestPointMap(){
+    const subArea=document.getElementById('propertySubArea')?.value||'';
+    const selVal=document.getElementById('nearestPointSelect')?.value||'';
+    const key=subArea||'__general__';
+    const points=customNearestPoints[key]||[];
+    const found=points.find(p=>p.name===selVal);
+    if(found&&found.mapLink)window.open(found.mapLink,'_blank');
+    else showToast('Google Maps link not available');
+}
+
+function addNearestPoint(){
+    const subArea=document.getElementById('propertySubArea')?.value||'';
+    const name=(document.getElementById('newNearestPointName')?.value||'').trim();
+    const mapLink=(document.getElementById('newNearestPointMapLink')?.value||'').trim();
+    const key=subArea||'__general__';
+    if(!name)return showToast('Please enter a place name');
+    if(!customNearestPoints[key])customNearestPoints[key]=[];
+    if(customNearestPoints[key].find(p=>p.name===name))return showToast('This place already exists');
+    customNearestPoints[key].push({name,mapLink});
+    localStorage.setItem('customNearestPoints',JSON.stringify(customNearestPoints));
+    if(document.getElementById('newNearestPointName'))document.getElementById('newNearestPointName').value='';
+    if(document.getElementById('newNearestPointMapLink'))document.getElementById('newNearestPointMapLink').value='';
+    loadNearestPointsForUpload();
+    if(document.getElementById('nearestPointSelect'))document.getElementById('nearestPointSelect').value=name;
+    onNearestPointSelect();
+    showToast('Nearby place added: '+name);
+}
+
+function removeNearestPoint(subArea,name){
+    if(!confirm(`Remove "${name}"?`))return;
+    if(customNearestPoints[subArea])customNearestPoints[subArea]=customNearestPoints[subArea].filter(p=>p.name!==name);
+    localStorage.setItem('customNearestPoints',JSON.stringify(customNearestPoints));
+    loadNearestPointsForUpload();
+    showToast('Removed: '+name);
+}
+
+function renderNearestPointsList(subArea,container,points){
+    if(!container)return;
+    if(points.length===0){container.innerHTML='<p style="color:#aaa;font-size:11px;padding:4px">No nearby places added yet</p>';return;}
+    container.innerHTML=points.map(p=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 4px;border-bottom:1px solid var(--border);font-size:12px;gap:6px">
+            <span style="flex:1;color:var(--text-secondary)">${p.name}</span>
+            ${p.mapLink?`<a href="${p.mapLink}" target="_blank" style="color:#4285f4;font-size:11px;text-decoration:none;flex-shrink:0"><i class="fas fa-map-marker-alt"></i> Map</a>`:''}
+            <button onclick="removeNearestPoint('${subArea.replace(/'/g,"\\'")}','${p.name.replace(/'/g,"\\'")}');" style="background:var(--danger);color:#fff;border:none;border-radius:4px;width:20px;height:20px;cursor:pointer;flex-shrink:0;font-size:10px"><i class="fas fa-times"></i></button>
+        </div>`).join('');
+}
+
+// ===== AUTO SESSION =====
+(async function(){
+    await initDefaultCreds();
+    const saved=sessionStorage.getItem('currentUser_user');
+    if(saved){try{currentUser=JSON.parse(saved);showDashboard();}catch(e){sessionStorage.removeItem('currentUser_user');}}
+})();
 </script>
 </body>
 </html>

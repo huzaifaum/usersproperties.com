@@ -1,4 +1,4 @@
-/* ===== UAE PROPERTIES - SHARED JS ===== */
+/* ===== UAE PROPERTIES - SHARED JS (UPDATED) ===== */
 
 // ===== DATA =====
 const defaultCityAreas = {
@@ -41,6 +41,8 @@ const subAreaMapsLinks = {
 let customAreas = JSON.parse(localStorage.getItem('customAreas')) || JSON.parse(JSON.stringify(defaultCityAreas));
 let customSubAreas = JSON.parse(localStorage.getItem('customSubAreas')) || JSON.parse(JSON.stringify(defaultSubAreas));
 let customSubAreaLinks = JSON.parse(localStorage.getItem('customSubAreaLinks')) || {};
+// Nearest points with categories
+let customNearestPoints = JSON.parse(localStorage.getItem('customNearestPoints')) || {};
 
 const propertyTypes = [
     'Studio Apartment','Bed Space','Partition','Room','Hall',
@@ -53,14 +55,14 @@ const propertyTypes = [
     'Warehouse','Shop','Office - Building','Office - Street'
 ];
 
-const DATA_VERSION = 'v6';
+const DATA_VERSION = 'v7';
 if(localStorage.getItem('dataVersion') !== DATA_VERSION){
     localStorage.removeItem('properties');
     localStorage.setItem('dataVersion', DATA_VERSION);
 }
 let properties = JSON.parse(localStorage.getItem('properties')) || [];
 
-// Seed sample data
+// Seed sample data with nearest places
 if(properties.length===0){
     const today=new Date();
     const in1day=new Date(today); in1day.setDate(in1day.getDate()+1);
@@ -70,9 +72,9 @@ if(properties.length===0){
     const day1=new Date(today); day1.setDate(day1.getDate()-1);
     const day2=new Date(today); day2.setDate(day2.getDate()-2);
     properties=[
-        {id:1,profileCode:'561',title:'Skyline Residencies',city:'Dubai',area:'Dubai Marina',subArea:'Marina Walk',type:'Studio Apartment',price:280000,propertyStatus:'rent',rentalType:'monthly',bedrooms:0,bathrooms:1,areaSize:500,description:'Beautiful studio in prime location with stunning marina views. Modern furnishings, high-speed internet, gym and pool access included.',amenities:{balcony:'yes',attachedWashroom:'yes',window:'yes',commonWashroom:'no',fullClosed:'yes',genderPreference:'male',kidsAllowed:'no',bachelorsAllowed:'yes'},imageLabels:{main:'Balcony',second:'Master Bedroom',third:'Kitchen',fourth:'Living Room',fifth:'Bathroom',sixth:'View'},images:['https://images.unsplash.com/photo-1501183638710-841dd1904471?w=800','https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800','https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800','https://images.unsplash.com/photo-1560448075-bb4caa6c0c39?w=800','https://images.unsplash.com/photo-1560184897-ae75f418493e?w=800','https://images.unsplash.com/photo-1560185009-5bf9f2849488?w=800'],contact:{whatsapp:'+971 50 123 4567',phone:'+971 4 987 6543'},locationLink:'https://maps.google.com/?q=Dubai+Marina,Dubai,UAE',videoUrl:'https://www.youtube.com/embed/dQw4w9WgXcQ',userId:'user',status:'approved',createdAt:day2.toISOString(),availableFrom:in1day.toISOString(),availableIn:'1 day',timerUpdatedAt:day2.toISOString()},
-        {id:2,profileCode:'562',title:'Luxury Villa with Pool',city:'Dubai',area:'Palm Jumeirah',subArea:'Shoreline',type:'5 BHK Villa',price:8500000,propertyStatus:'sale',rentalType:'sale',bedrooms:5,bathrooms:7,areaSize:5000,description:'Luxury villa with private pool and beach access.',amenities:{balcony:'yes',attachedWashroom:'yes',window:'yes',commonWashroom:'no',fullClosed:'yes',genderPreference:'female',kidsAllowed:'yes',bachelorsAllowed:'no'},imageLabels:{main:'Balcony',second:'Master Bedroom',third:'Kitchen',fourth:'Pool',fifth:'Garden',sixth:'View'},images:['https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800','https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800','https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800','https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800','https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=800'],contact:{whatsapp:'+971 50 987 6543',phone:'+971 4 123 4567'},locationLink:'https://maps.google.com/?q=Palm+Jumeirah,Dubai,UAE',videoUrl:'https://www.youtube.com/embed/3AtDnEC4zak',userId:'user',status:'approved',createdAt:day1.toISOString(),availableFrom:in7days.toISOString(),availableIn:'7 days',timerUpdatedAt:day1.toISOString()},
-        {id:3,profileCode:'563',title:'Modern 2BHK Near Mall',city:'Abu Dhabi',area:'Al Reem Island',subArea:'',type:'2 BHK',price:95000,propertyStatus:'rent',rentalType:'yearly',bedrooms:2,bathrooms:2,areaSize:1200,description:'Modern 2 BHK apartment with great amenities.',amenities:{balcony:'yes',attachedWashroom:'yes',window:'yes',commonWashroom:'no',fullClosed:'no',genderPreference:'male',kidsAllowed:'yes',bachelorsAllowed:'yes'},imageLabels:{main:'Living Room',second:'Bedroom 1',third:'Kitchen',fourth:'Bedroom 2',fifth:'Bathroom',sixth:'View'},images:['https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800','https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800','https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800','https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800','https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?w=800'],contact:{whatsapp:'+971 55 456 7890',phone:'+971 2 345 6789'},locationLink:'https://maps.google.com/?q=Al+Reem+Island,Abu+Dhabi,UAE',videoUrl:'https://www.youtube.com/embed/ScMzIvxBSi4',userId:'user',status:'approved',createdAt:day0.toISOString(),availableFrom:in3days.toISOString(),availableIn:'3 days',timerUpdatedAt:day0.toISOString()}
+        {id:1,profileCode:'561',title:'Skyline Residencies',city:'Dubai',area:'Dubai Marina',subArea:'Marina Walk',type:'Studio Apartment',price:280000,propertyStatus:'rent',rentalType:'monthly',bedrooms:0,bathrooms:1,areaSize:500,description:'Beautiful studio in prime location with stunning marina views.',amenities:{balcony:'yes',attachedWashroom:'yes',window:'yes',commonWashroom:'no',fullClosed:'yes',genderPreference:'male',kidsAllowed:'no',bachelorsAllowed:'yes'},imageLabels:{main:'Balcony',second:'Master Bedroom',third:'Kitchen',fourth:'Living Room',fifth:'Bathroom',sixth:'View'},images:['https://images.unsplash.com/photo-1501183638710-841dd1904471?w=800','https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800','https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800','https://images.unsplash.com/photo-1560448075-bb4caa6c0c39?w=800','https://images.unsplash.com/photo-1560184897-ae75f418493e?w=800','https://images.unsplash.com/photo-1560185009-5bf9f2849488?w=800'],contact:{whatsapp:'+971 50 123 4567',phone:'+971 4 987 6543'},locationLink:'https://maps.google.com/?q=Dubai+Marina,Dubai,UAE',videoUrl:'https://www.youtube.com/embed/dQw4w9WgXcQ',userId:'user',status:'approved',createdAt:day2.toISOString(),availableFrom:in1day.toISOString(),availableIn:'1 day',timerUpdatedAt:day2.toISOString(),nearestPlaces:[{name:'Marina Mall',category:'Market',mapLink:'https://maps.google.com/?q=Marina+Mall,Dubai'},{name:'Mediclinic',category:'Hospital',mapLink:'https://maps.google.com/?q=Mediclinic+Dubai+Marina'}]},
+        {id:2,profileCode:'562',title:'Luxury Villa with Pool',city:'Dubai',area:'Palm Jumeirah',subArea:'Shoreline',type:'5 BHK Villa',price:8500000,propertyStatus:'sale',rentalType:'sale',bedrooms:5,bathrooms:7,areaSize:5000,description:'Luxury villa with private pool and beach access.',amenities:{balcony:'yes',attachedWashroom:'yes',window:'yes',commonWashroom:'no',fullClosed:'yes',genderPreference:'female',kidsAllowed:'yes',bachelorsAllowed:'no'},imageLabels:{main:'Balcony',second:'Master Bedroom',third:'Kitchen',fourth:'Pool',fifth:'Garden',sixth:'View'},images:['https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800','https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800','https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800','https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800','https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=800'],contact:{whatsapp:'+971 50 987 6543',phone:'+971 4 123 4567'},locationLink:'https://maps.google.com/?q=Palm+Jumeirah,Dubai,UAE',videoUrl:'https://www.youtube.com/embed/3AtDnEC4zak',userId:'user',status:'approved',createdAt:day1.toISOString(),availableFrom:in7days.toISOString(),availableIn:'7 days',timerUpdatedAt:day1.toISOString(),nearestPlaces:[{name:'Nakheel Mall',category:'Market',mapLink:'https://maps.google.com/?q=Nakheel+Mall'},{name:'Palm Mosque',category:'Mosque',mapLink:'https://maps.google.com/?q=Palm+Mosque'}]},
+        {id:3,profileCode:'563',title:'Modern 2BHK Near Mall',city:'Abu Dhabi',area:'Al Reem Island',subArea:'',type:'2 BHK',price:95000,propertyStatus:'rent',rentalType:'yearly',bedrooms:2,bathrooms:2,areaSize:1200,description:'Modern 2 BHK apartment with great amenities.',amenities:{balcony:'yes',attachedWashroom:'yes',window:'yes',commonWashroom:'no',fullClosed:'no',genderPreference:'male',kidsAllowed:'yes',bachelorsAllowed:'yes'},imageLabels:{main:'Living Room',second:'Bedroom 1',third:'Kitchen',fourth:'Bedroom 2',fifth:'Bathroom',sixth:'View'},images:['https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800','https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800','https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800','https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800','https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?w=800'],contact:{whatsapp:'+971 55 456 7890',phone:'+971 2 345 6789'},locationLink:'https://maps.google.com/?q=Al+Reem+Island,Abu+Dhabi,UAE',videoUrl:'https://www.youtube.com/embed/ScMzIvxBSi4',userId:'user',status:'approved',createdAt:day0.toISOString(),availableFrom:in3days.toISOString(),availableIn:'3 days',timerUpdatedAt:day0.toISOString(),nearestPlaces:[]}
     ];
     localStorage.setItem('properties',JSON.stringify(properties));
 }
@@ -90,6 +92,11 @@ function hideToast(){const t=document.getElementById('notificationToast');if(t)t
 function formatDate(d){
     const diff=Math.ceil((new Date()-new Date(d))/(1000*60*60*24));
     if(diff<=1)return'Today';if(diff===2)return'Yesterday';return diff+' days ago';
+}
+function formatCardDate(d){
+    if(!d)return'';
+    try{return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+    catch(e){return'';}
 }
 function getStatusText(s){return{rent:'For Rent',sale:'For Sale','under-construction':'Under Construction','sold-out':'Sold Out'}[s]||s}
 
@@ -142,7 +149,124 @@ function addSubAreaFromUpload(){
     if(document.getElementById('uploadSubAreaMapLink'))document.getElementById('uploadSubAreaMapLink').value='';
     loadSubAreasForUpload();
     if(document.getElementById('propertySubArea'))document.getElementById('propertySubArea').value=newSub;
+    if(typeof loadNearestPointsForUpload==='function')loadNearestPointsForUpload();
     showToast('Sub Area added: '+newSub);
+}
+
+// ===== NEAREST PLACES FUNCTIONS =====
+const placeCategories = [
+    {value:'school',label:'🏫 School',icon:'fa-school'},
+    {value:'hospital',label:'🏥 Hospital',icon:'fa-hospital'},
+    {value:'mosque',label:'🕌 Mosque',icon:'fa-mosque'},
+    {value:'market',label:'🛒 Market/Supermarket',icon:'fa-store'},
+    {value:'park',label:'🌳 Park',icon:'fa-tree'},
+    {value:'restaurant',label:'🍽️ Restaurant',icon:'fa-utensils'},
+    {value:'metro',label:'🚇 Metro Station',icon:'fa-subway'},
+    {value:'bus',label:'🚌 Bus Stop',icon:'fa-bus'},
+    {value:'mall',label:'🏬 Mall',icon:'fa-shopping-mall'},
+    {value:'pharmacy',label:'💊 Pharmacy',icon:'fa-capsules'},
+    {value:'gym',label:'💪 Gym',icon:'fa-dumbbell'},
+    {value:'bank',label:'🏦 Bank',icon:'fa-landmark'}
+];
+
+function loadNearestPointsForUpload(){
+    const subArea=document.getElementById('propertySubArea')?.value||'';
+    const section=document.getElementById('nearestPlacesSection');
+    const container=document.getElementById('nearestPlacesContainer');
+    if(!section)return;
+    if(!subArea){
+        section.style.display='none';
+        return;
+    }
+    section.style.display='block';
+    // Load existing nearest places for this sub area
+    const existingPlaces = customNearestPoints[subArea] || [];
+    if(container){
+        container.innerHTML = existingPlaces.map((place, idx) => `
+            <div class="nearest-place-item" data-idx="${idx}">
+                <div class="np-header">
+                    <i class="fas ${placeCategories.find(c=>c.value===place.category)?.icon || 'fa-map-marker-alt'}"></i>
+                    <strong>${place.name}</strong>
+                    <span class="np-category">${placeCategories.find(c=>c.value===place.category)?.label || place.category}</span>
+                    <button type="button" class="np-remove" onclick="removeNearestPlace('${subArea.replace(/'/g,"\\'")}', '${place.name.replace(/'/g,"\\'")}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                ${place.mapLink ? `<a href="${place.mapLink}" target="_blank" class="np-map-link"><i class="fas fa-map-marker-alt"></i> View on Map</a>` : ''}
+            </div>
+        `).join('');
+        if(existingPlaces.length === 0){
+            container.innerHTML = '<p class="np-empty">No nearest places added yet. Use the form below to add places like schools, hospitals, mosques, markets, etc.</p>';
+        }
+    }
+    // Populate category dropdown
+    const catSelect = document.getElementById('nearestPlaceCategory');
+    if(catSelect){
+        catSelect.innerHTML = placeCategories.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
+    }
+}
+
+function addNearestPlace(){
+    const subArea = document.getElementById('propertySubArea')?.value||'';
+    const name = document.getElementById('newNearestPlaceName')?.value.trim();
+    const category = document.getElementById('nearestPlaceCategory')?.value;
+    const mapLink = document.getElementById('newNearestPlaceMapLink')?.value.trim();
+    
+    if(!subArea){
+        showToast('Please select a Sub Area first');
+        return;
+    }
+    if(!name){
+        showToast('Please enter a place name');
+        return;
+    }
+    if(!category){
+        showToast('Please select a category');
+        return;
+    }
+    
+    if(!customNearestPoints[subArea]) customNearestPoints[subArea] = [];
+    if(customNearestPoints[subArea].find(p => p.name.toLowerCase() === name.toLowerCase())){
+        showToast('This place already exists for this sub area');
+        return;
+    }
+    
+    customNearestPoints[subArea].push({
+        name: name,
+        category: category,
+        mapLink: mapLink || `https://maps.google.com/?q=${encodeURIComponent(name + ',' + subArea + ',UAE')}`
+    });
+    localStorage.setItem('customNearestPoints', JSON.stringify(customNearestPoints));
+    
+    // Clear inputs
+    if(document.getElementById('newNearestPlaceName')) document.getElementById('newNearestPlaceName').value = '';
+    if(document.getElementById('newNearestPlaceMapLink')) document.getElementById('newNearestPlaceMapLink').value = '';
+    
+    loadNearestPointsForUpload();
+    showToast(`Added: ${name} (${placeCategories.find(c=>c.value===category)?.label})`);
+}
+
+function removeNearestPlace(subArea, name){
+    if(!confirm(`Remove "${name}" from nearest places?`)) return;
+    if(customNearestPoints[subArea]){
+        customNearestPoints[subArea] = customNearestPoints[subArea].filter(p => p.name !== name);
+        localStorage.setItem('customNearestPoints', JSON.stringify(customNearestPoints));
+        loadNearestPointsForUpload();
+        showToast('Removed: ' + name);
+    }
+}
+
+function getSelectedNearestPlaces(){
+    const subArea = document.getElementById('propertySubArea')?.value||'';
+    const selectedPlaces = [];
+    const checkboxes = document.querySelectorAll('#nearestPlacesContainer input[type="checkbox"]:checked');
+    checkboxes.forEach(cb => {
+        const idx = parseInt(cb.getAttribute('data-idx'));
+        if(!isNaN(idx) && customNearestPoints[subArea] && customNearestPoints[subArea][idx]){
+            selectedPlaces.push(customNearestPoints[subArea][idx]);
+        }
+    });
+    return selectedPlaces;
 }
 
 // ===== IMAGE UPLOAD =====
@@ -173,13 +297,14 @@ function getUploadedImages(){
     return imgs;
 }
 function getImageLabels(){
+    // Updated labels for better property terms
     return{
         main:document.getElementById('lbl1')?.value||'Balcony',
-        second:document.getElementById('lbl2')?.value||'Master Bedroom',
+        second:document.getElementById('lbl2')?.value||'Bedroom',
         third:document.getElementById('lbl3')?.value||'Kitchen',
         fourth:document.getElementById('lbl4')?.value||'Living Room',
         fifth:document.getElementById('lbl5')?.value||'Bathroom',
-        sixth:document.getElementById('lbl6')?.value||'View'
+        sixth:document.getElementById('lbl6')?.value||'Area View'
     };
 }
 
@@ -243,7 +368,6 @@ function getFinalVideoUrl(){
 function openMapModal(subArea, locationLink){
     let mapUrl = locationLink || customSubAreaLinks[subArea] || subAreaMapsLinks[subArea] || '';
     if(!mapUrl) mapUrl = `https://maps.google.com/?q=${encodeURIComponent(subArea+',UAE')}`;
-    // Convert to embed
     let embedUrl = mapUrl;
     if(mapUrl.includes('maps.google.com')&&!mapUrl.includes('/embed')){
         const q = mapUrl.split('?q=')[1]||encodeURIComponent(subArea+',UAE');
@@ -280,7 +404,6 @@ function _renderLightbox(){
     document.getElementById('lbCounter').textContent=(_lbIndex+1)+' / '+_lbImages.length;
     const thumbs=document.getElementById('lbThumbs');
     if(thumbs)thumbs.innerHTML=_lbImages.map((src,i)=>`<div class="lb-thumb ${i===_lbIndex?'active':''}" onclick="lbGoTo(${i})"><img src="${src}" loading="lazy"></div>`).join('');
-    // Scroll active thumb into view
     setTimeout(()=>{const active=thumbs?.querySelector('.lb-thumb.active');if(active)active.scrollIntoView({block:'nearest',inline:'center'});},50);
 }
 function lbGoTo(i){_lbIndex=i;_renderLightbox();}
@@ -383,7 +506,12 @@ function buildShareText(p){
     if(p.amenities?.window==='yes')amenList.push('Window');
     if(p.amenities?.commonWashroom==='yes')amenList.push('Common Washroom');
     if(p.amenities?.fullClosed==='yes')amenList.push('Full Closed');
-    return['🏢 *USERS PROPERTIES UAE*','📌 Code: '+(p.profileCode||'—'),'','🏠 *'+(p.title||'')+'*','📍 '+(p.subArea?p.subArea+', ':'')+p.area+', '+p.city,'💰 AED '+(p.price||0).toLocaleString()+(p.rentalType&&p.rentalType!=='sale'?' / '+(rentalMap[p.rentalType]||p.rentalType):''),'🏷️ '+(statusMap[p.propertyStatus]||''),'','📐 '+(p.type||'')+' | '+(p.areaSize||'')+' Sq Ft'+(p.bedrooms>0?' | '+p.bedrooms+' Bed':'')+' | '+(p.bathrooms||'')+' Bath',amenList.length>0?'✨ '+amenList.join(', '):'',p.availableIn?'⏰ Available In: '+p.availableIn:'','',p.description?'📝 '+p.description:'','','📞 WA: '+(p.contact?.whatsapp||'—'),'📞 Ph: '+(p.contact?.phone||'—'),'','━━━━━━━━━━━━━━━━━━━━','🌐 UAE Properties Portal'].filter(l=>l!==null&&l!==undefined&&l!=='').join('\n');
+    // Add nearest places to share text
+    let nearestText = '';
+    if(p.nearestPlaces && p.nearestPlaces.length > 0){
+        nearestText = '\n\n📍 Nearby:\n' + p.nearestPlaces.map(pl => `  • ${pl.name} (${placeCategories.find(c=>c.value===pl.category)?.label || pl.category})`).join('\n');
+    }
+    return['🏢 *USERS PROPERTIES UAE*','📌 Code: '+(p.profileCode||'—'),'','🏠 *'+(p.title||'')+'*','📍 '+(p.subArea?p.subArea+', ':'')+p.area+', '+p.city,'💰 AED '+(p.price||0).toLocaleString()+(p.rentalType&&p.rentalType!=='sale'?' / '+(rentalMap[p.rentalType]||p.rentalType):''),'🏷️ '+(statusMap[p.propertyStatus]||''),'','📐 '+(p.type||'')+' | '+(p.areaSize||'')+' Sq Ft'+(p.bedrooms>0?' | '+p.bedrooms+' Bed':'')+' | '+(p.bathrooms||'')+' Bath',amenList.length>0?'✨ '+amenList.join(', '):'',p.availableIn?'⏰ Available In: '+p.availableIn:'',nearestText,'',p.description?'📝 '+p.description:'','','📞 WA: '+(p.contact?.whatsapp||'—'),'📞 Ph: '+(p.contact?.phone||'—'),'','━━━━━━━━━━━━━━━━━━━━','🌐 UAE Properties Portal'].filter(l=>l!==null&&l!==undefined&&l!=='').join('\n');
 }
 async function shareProperty(id){
     const p=properties.find(pr=>pr.id===id);if(!p)return;
@@ -481,65 +609,202 @@ localStorage.setItem=function(key,val){
     try{_origSetItem(key,val);}catch(e){}
 };
 
-// ===== NOTIFICATION SYSTEM =====
-let _notifList=[];
+// ===== NOTIFICATION SYSTEM (FIXED) =====
+let _notifList = [];
+let _lastNotifCheck = null;
+
 function checkAvailabilityNotifications(){
-    const now=new Date();
-    const NOTIF_KEY='_shownNotifs';
-    let shownNotifs=JSON.parse(sessionStorage.getItem(NOTIF_KEY)||'[]');
-    _notifList=[];
-    properties.forEach(p=>{
-        if(p.status!=='approved')return;
-        const timerUpdated=new Date(p.timerUpdatedAt||0);
-        const originalCreated=new Date(p.originalCreatedAt||p.createdAt||0);
-        const ageMs=now-originalCreated;
-        const oldDays=Math.floor(ageMs/(1000*60*60*24));
-        const updatedRecently=(now-timerUpdated)<(24*60*60*1000);
-        if(oldDays>=30&&updatedRecently)_notifList.push(p);
+    const now = new Date();
+    const NOTIF_KEY = '_shownNotifs_v2';
+    let shownNotifs = JSON.parse(sessionStorage.getItem(NOTIF_KEY) || '[]');
+    _notifList = [];
+    
+    properties.forEach(p => {
+        if(p.status !== 'approved') return;
+        
+        // Check if property becomes available (availableFrom date is today or in future but within 7 days)
+        if(p.availableFrom) {
+            const availDate = new Date(p.availableFrom);
+            const daysUntilAvail = Math.ceil((availDate - now) / (1000 * 60 * 60 * 24));
+            const isRecentlyAvailable = daysUntilAvail <= 7 && daysUntilAvail >= 0;
+            const notifKey = `avail_${p.id}_${Math.floor(availDate.getTime() / (24*60*60*1000))}`;
+            
+            if(isRecentlyAvailable && !shownNotifs.includes(notifKey)) {
+                _notifList.push({
+                    ...p,
+                    _notifKey: notifKey,
+                    _notifType: 'availability',
+                    _message: `📢 ${p.title} will be available in ${daysUntilAvail === 0 ? 'today' : daysUntilAvail + ' days'}!`
+                });
+            }
+        }
+        
+        // Check for recently updated/timer properties (last 24 hours)
+        if(p.timerUpdatedAt) {
+            const updatedDate = new Date(p.timerUpdatedAt);
+            const hoursSinceUpdate = (now - updatedDate) / (1000 * 60 * 60);
+            const notifKey = `update_${p.id}_${Math.floor(updatedDate.getTime() / (24*60*60*1000))}`;
+            
+            if(hoursSinceUpdate <= 24 && hoursSinceUpdate > 0 && !shownNotifs.includes(notifKey)) {
+                _notifList.push({
+                    ...p,
+                    _notifKey: notifKey,
+                    _notifType: 'update',
+                    _message: `🔄 ${p.title} has been updated! New ${p.propertyStatus === 'rent' ? 'rental' : 'sale'} details available.`
+                });
+            }
+        }
     });
-    const newNotifs=_notifList.filter(p=>!shownNotifs.includes(p.id));
-    if(newNotifs.length>0){
+    
+    // Sort notifications by date (newest first)
+    _notifList.sort((a, b) => new Date(b.timerUpdatedAt || b.createdAt) - new Date(a.timerUpdatedAt || a.createdAt));
+    
+    // Add new notifications to session storage
+    const newNotifs = _notifList.filter(n => !shownNotifs.includes(n._notifKey));
+    if(newNotifs.length > 0) {
         updateNotifBadge(newNotifs.length);
-        const newIds=newNotifs.map(p=>p.id);
-        sessionStorage.setItem(NOTIF_KEY,JSON.stringify([...shownNotifs,...newIds]));
-        newNotifs.forEach((p,i)=>setTimeout(()=>showNotifToast(p),1500+(i*4000)));
+        const newKeys = newNotifs.map(n => n._notifKey);
+        sessionStorage.setItem(NOTIF_KEY, JSON.stringify([...shownNotifs, ...newKeys]));
+        
+        // Show toast for each new notification (limit to 3)
+        newNotifs.slice(0, 3).forEach((n, i) => {
+            setTimeout(() => showNotifToast(n), 1500 + (i * 3000));
+        });
     }
+    
     renderNotifBar(_notifList);
 }
+
 function renderNotifBar(list){
-    const strip=document.getElementById('subNotifItems');if(!strip)return;
-    const countEl=document.getElementById('subNotifCount');
-    if(!list||list.length===0){
-        strip.innerHTML='<span class="sub-notif-empty"><i class="fas fa-bell-slash"></i> No notifications</span>';
-        if(countEl)countEl.style.display='none';return;
+    const strip = document.getElementById('subNotifItems');
+    if(!strip) return;
+    const countEl = document.getElementById('subNotifCount');
+    
+    if(!list || list.length === 0){
+        strip.innerHTML = '<span class="sub-notif-empty"><i class="fas fa-bell-slash"></i> No notifications</span>';
+        if(countEl) countEl.style.display = 'none';
+        return;
     }
-    strip.innerHTML=list.map(p=>`<div class="sub-notif-chip unread" onclick="scrollToTopProperty(${p.id})"><i class="fas fa-bell"></i>${p.title||'Property'} — ${p.area||p.city}</div>`).join('');
-    if(countEl){countEl.textContent=list.length;countEl.style.display='inline';}
+    
+    // Display notifications in card format
+    strip.innerHTML = list.map(n => `
+        <div class="sub-notif-card unread" onclick="scrollToTopProperty(${n.id})">
+            <div class="notif-card-icon ${n._notifType === 'availability' ? 'avail' : 'update'}">
+                <i class="fas ${n._notifType === 'availability' ? 'fa-calendar-check' : 'fa-sync-alt'}"></i>
+            </div>
+            <div class="notif-card-content">
+                <div class="notif-card-title">${n.title || 'Property'}</div>
+                <div class="notif-card-message">${n._message || (n._notifType === 'availability' ? 'Now available!' : 'Property updated')}</div>
+                <div class="notif-card-location"><i class="fas fa-map-marker-alt"></i> ${n.area}, ${n.city}</div>
+                <div class="notif-card-price">AED ${(n.price || 0).toLocaleString()}</div>
+            </div>
+            <div class="notif-card-time">${formatNotificationTime(n.timerUpdatedAt || n.createdAt)}</div>
+        </div>
+    `).join('');
+    
+    if(countEl){
+        countEl.textContent = list.length;
+        countEl.style.display = 'inline';
+    }
 }
+
+function formatNotificationTime(dateStr){
+    if(!dateStr) return '';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if(diffMins < 1) return 'Just now';
+    if(diffMins < 60) return `${diffMins} min ago`;
+    if(diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+}
+
 function scrollToTopProperty(id){
-    if(typeof showSection==='function')showSection('properties',document.querySelector('.nav-link'));
-    setTimeout(()=>{window.scrollTo({top:0,behavior:'smooth'});showToast('Property moved to top!');},300);
+    // Find property and scroll to it
+    if(typeof showSection === 'function') showSection('properties', document.querySelector('.nav-link'));
+    setTimeout(() => {
+        // Try to scroll to property card
+        const cards = document.querySelectorAll('.property-card');
+        for(let card of cards){
+            if(card.innerHTML.includes(`"${id}"`) || card.querySelector(`[onclick*="${id}"]`)){
+                card.scrollIntoView({behavior: 'smooth', block: 'center'});
+                card.style.border = '3px solid var(--primary)';
+                setTimeout(() => {
+                    card.style.border = '';
+                }, 3000);
+                break;
+            }
+        }
+        showToast('Property found!');
+    }, 300);
 }
+
 function updateNotifBadge(count){
-    const countEl=document.getElementById('subNotifCount');
-    if(countEl){countEl.textContent=count;countEl.style.display=count>0?'inline':'none';}
+    const countEl = document.getElementById('subNotifCount');
+    if(countEl){
+        countEl.textContent = count;
+        countEl.style.display = count > 0 ? 'inline' : 'none';
+    }
+    // Animate bell icon
+    const bellIcon = document.querySelector('.sub-notif-label i');
+    if(bellIcon && count > 0){
+        bellIcon.classList.add('bell-shake');
+        setTimeout(() => bellIcon.classList.remove('bell-shake'), 600);
+    }
 }
+
 function toggleNotifBar(){}
 function closeNotifBar(){}
 function markAllRead(){
-    document.querySelectorAll('.sub-notif-chip.unread').forEach(el=>el.classList.remove('unread'));
-    const countEl=document.getElementById('subNotifCount');if(countEl)countEl.style.display='none';
+    document.querySelectorAll('.sub-notif-card.unread').forEach(el => el.classList.remove('unread'));
+    const countEl = document.getElementById('subNotifCount');
+    if(countEl) countEl.style.display = 'none';
     showToast('All notifications marked as read');
 }
 
-function showNotifToast(p){
-    const existing=document.getElementById('availNotifToast');if(existing)existing.remove();
-    const div=document.createElement('div');div.id='availNotifToast';
-    div.style.cssText='position:fixed;top:90px;left:50%;transform:translateX(-50%);z-index:99999;background:#fff;border-radius:16px;padding:14px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.25);border-left:5px solid var(--primary);display:flex;align-items:center;gap:14px;max-width:400px;width:90%;animation:slideDown .4s ease';
-    div.innerHTML=`<div style="background:linear-gradient(135deg,#c9a227,#fbbf24);width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.2rem;">🔔</div><div style="flex:1;min-width:0;"><div style="font-weight:700;color:#1a2a45;font-size:13px;">Property Available Again!</div><div style="color:#555;font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.title} — ${p.city}</div></div><button onclick="document.getElementById('availNotifToast').remove()" style="background:none;border:none;font-size:18px;color:#999;cursor:pointer;padding:0;flex-shrink:0;">✕</button>`;
-    if(!document.getElementById('notifAnimStyle')){const s=document.createElement('style');s.id='notifAnimStyle';s.textContent='@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';document.head.appendChild(s);}
+function showNotifToast(notification){
+    const existing = document.getElementById('availNotifToast');
+    if(existing) existing.remove();
+    
+    const div = document.createElement('div');
+    div.id = 'availNotifToast';
+    div.style.cssText = 'position:fixed;top:90px;left:50%;transform:translateX(-50%);z-index:99999;background:#fff;border-radius:16px;padding:14px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.25);border-left:5px solid var(--primary);display:flex;align-items:center;gap:14px;max-width:400px;width:90%;animation:slideDown .4s ease';
+    div.innerHTML = `
+        <div style="background:linear-gradient(135deg,#c9a227,#fbbf24);width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.2rem;">
+            ${notification._notifType === 'availability' ? '🔔' : '🔄'}
+        </div>
+        <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;color:#1a2a45;font-size:13px;">${notification._notifType === 'availability' ? 'Property Available Soon!' : 'Property Updated!'}</div>
+            <div style="color:#555;font-size:12px;margin-top:2px;">${notification.title} — ${notification.city}</div>
+            <div style="color:#c9a227;font-size:11px;margin-top:2px;">AED ${(notification.price || 0).toLocaleString()}</div>
+        </div>
+        <button onclick="document.getElementById('availNotifToast').remove()" style="background:none;border:none;font-size:18px;color:#999;cursor:pointer;padding:0;flex-shrink:0;">✕</button>
+    `;
+    
+    if(!document.getElementById('notifAnimStyle')){
+        const s = document.createElement('style');
+        s.id = 'notifAnimStyle';
+        s.textContent = '@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';
+        document.head.appendChild(s);
+    }
+    
     document.body.appendChild(div);
-    setTimeout(()=>{if(document.getElementById('availNotifToast'))document.getElementById('availNotifToast').remove();},6000);
+    setTimeout(() => {
+        if(document.getElementById('availNotifToast')) document.getElementById('availNotifToast').remove();
+    }, 8000);
+}
+
+// Run notification check every 30 seconds
+let notifInterval = null;
+function startNotificationChecker(){
+    if(notifInterval) clearInterval(notifInterval);
+    notifInterval = setInterval(() => {
+        checkAvailabilityNotifications();
+    }, 30000);
 }
 
 // ===== NAVBAR SEARCH =====
@@ -564,7 +829,9 @@ function showSearchResults(q){
     const dropdown=document.getElementById('searchDropdown');if(!dropdown)return;
     const ql=q.toLowerCase();
     let filtered=properties.filter(p=>p.status==='approved');
-    filtered=filtered.filter(p=>(p.title||'').toLowerCase().includes(ql)||(p.area||'').toLowerCase().includes(ql)||(p.subArea||'').toLowerCase().includes(ql)||(p.city||'').toLowerCase().includes(ql)||(p.profileCode||'').toLowerCase().includes(ql)||(p.type||'').toLowerCase().includes(ql));
+    filtered=filtered.filter(p=>(p.title||'').toLowerCase().includes(ql)||(p.area||'').toLowerCase().includes(ql)||(p.subArea||'').toLowerCase().includes(ql)||(p.city||'').toLowerCase().includes(ql)||(p.profileCode||'').toLowerCase().includes(ql)||(p.type||'').toLowerCase().includes(ql)||formatCardDate(p.createdAt).toLowerCase().includes(ql)||formatCardDate(p.availableFrom).toLowerCase().includes(ql));
+    // Sort by date (newest first)
+    filtered.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
     const fallback=`data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='36'%3E%3Crect width='48' height='36' fill='%23eee'/%3E%3C/svg%3E`;
     if(filtered.length===0){dropdown.innerHTML=`<div class="search-no-results"><i class="fas fa-search"></i>No results found</div>`;dropdown.classList.add('show');return;}
     dropdown.innerHTML=filtered.slice(0,8).map(p=>`
@@ -590,7 +857,8 @@ const PAGE_SIZE=20;
 let _currentList=[],_currentPage=0,_loadingMore=false;
 function sortProperties(list){
     return list.sort((a,b)=>{
-        const cA=new Date(a.createdAt||0).getTime();const cB=new Date(b.createdAt||0).getTime();
+        const cA=new Date(a.createdAt||0).getTime();
+        const cB=new Date(b.createdAt||0).getTime();
         if(cB!==cA)return cB-cA;
         return new Date(b.timerUpdatedAt||0).getTime()-new Date(a.timerUpdatedAt||0).getTime();
     });
@@ -625,4 +893,9 @@ function setupInfiniteScroll(){
     if(_scrollObserver)_scrollObserver.disconnect();
     _scrollObserver=new IntersectionObserver(entries=>{if(entries[0].isIntersecting)renderNextPage();},{threshold:0.1});
     setTimeout(()=>{const btn=document.getElementById('loadMoreBtn');if(btn)_scrollObserver.observe(btn);},100);
+}
+
+// Start notification checker on page load
+if(typeof window !== 'undefined'){
+    startNotificationChecker();
 }
